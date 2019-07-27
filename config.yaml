@@ -1,0 +1,13 @@
+config:
+  APIKey: XXX
+  APISecret: XXX
+  APIEndpoint: https://api.exchange.trade.io
+  MinBTC: xxx
+  MaxBTC: xxx
+  MinETH: xxx
+  MaxETH: xxx
+  MinUSDT: xxx
+  MaxUSDT: xxx
+  MinProfit: xxx
+  Timezone: xxx
+  Simulation: true
