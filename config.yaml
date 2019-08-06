@@ -11,3 +11,15 @@ config:
   MinProfit: xxx
   Timezone: xxx
   Simulation: true
+  Fees: 0.1
+  Exclusions:
+    - ktos
+    - btnt
+    - coy
+    - btc
+    - ttv
+    - dog
+    - kick
+    - xfrc
+    - usdt
+    - xrr

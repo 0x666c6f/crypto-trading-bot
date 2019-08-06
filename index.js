@@ -1,7 +1,7 @@
 var logger = require('./logger');
 var http = require('./http-manager');
 var tradeio = require('./tradeio');
-
+var tradebot = require('./trade-bot')
 require('./config.js')
 
 
@@ -28,12 +28,14 @@ require('./config.js')
 // tradeio.about()
 // tradeio.time()
 // tradeio.info()
-tradeio.newOrder("eth_btc","sell","limit",0.01,11,null).then(function(resp){
-    let tradeId = resp.order.orderId;
-    console.log(tradeId)
-    tradeio.cancelOrder(tradeId).then(function(resp){
-        console.log(resp)
-    }, function(error){
-        console.log(error)
-    })
-})
+// tradeio.newOrder("eth_btc","sell","limit",0.01,11,null).then(function(resp){
+//     let tradeId = resp.order.orderId;
+//     console.log(tradeId)
+//     tradeio.cancelOrder(tradeId).then(function(resp){
+//         console.log(resp)
+//     }, function(error){
+//         console.log(error)
+//     })
+// })
+
+tradebot.launchArbitrage("eth")
