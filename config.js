@@ -17,6 +17,8 @@ try {
     process.env.MinProfit = doc.config.MinProfit;
     process.env.Timezone = doc.config.Timezone;
     process.env.Simulation = doc.config.Simulation;
+    process.env.Fees = doc.config.Fees;
+    process.env.Exclusions = doc.config.Exclusions.toString().split(',')
     logger.info("Loaded config :")
     logger.info(JSON.stringify(process.env, null, 2));
   } else {

@@ -25,7 +25,7 @@ var get = function (url, auth, args) {
     }
     return new Promise((resolve, reject) => {
         request.get(options, function (err, res) {
-            if (res.body) {
+            if (res && res.body) {
                 logger.info("GET request successfull")
                 resolve(JSON.parse(res.body))
             } else if (err) {

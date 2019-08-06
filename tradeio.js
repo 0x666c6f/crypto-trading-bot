@@ -5,7 +5,7 @@ var about = function() {
     logger.info("TradeIO About Request")
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint+"/api/v1/about", false, null).then(function(resp) {
-            logger.info("About response = "+ JSON.stringify(resp, null, 2))
+            logger.info("About successful")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing About request = "+ JSON.stringify(error, null, 2))
@@ -21,7 +21,7 @@ var time = function() {
     logger.info("TradeIO Time Request")
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint+"/api/v1/time", false, null).then(function(resp) {
-            logger.info("Time response ="+ JSON.stringify(resp, null, 2))
+            logger.info("Time successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Time request = "+ JSON.stringify(error, null, 2))
@@ -37,7 +37,7 @@ var info = function() {
     logger.info("TradeIO Info Request")
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint+"/api/v1/info", false, null).then(function(resp) {
-            logger.info("Info response = "+ JSON.stringify(resp, null, 2))
+            logger.info("Info successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Info request = "+ JSON.stringify(error, null, 2))
@@ -53,7 +53,7 @@ var orderBook = function(symbol, limit) {
     logger.info("TradeIO Order Book Request for symbol " + symbol)
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint+"/api/v1/depth/"+symbol, false, "?limit="+limit).then(function(resp) {
-            logger.info("Order Book for symbol "+symbol+" response = "+ JSON.stringify(resp, null, 2))
+            logger.info("Order Book for symbol "+symbol+" successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Order book request = "+ JSON.stringify(error, null, 2))
@@ -69,7 +69,7 @@ var recentTrades = function(symbol, limit) {
     logger.info("TradeIO Recent Trades Request for symbol " + symbol)
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint+"/api/v1/trades/"+symbol, false, "?limit="+limit).then(function(resp) {
-            logger.info("Recent Trades for symbol "+symbol+" response = "+ JSON.stringify(resp, null, 2))
+            logger.info("Recent Trades for symbol "+symbol+" successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Recent trades request = "+ JSON.stringify(error, null, 2))
@@ -85,7 +85,7 @@ var ticker = function(symbol) {
     logger.info("TradeIO Ticker Request for symbol " + symbol)
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint+"/api/v1/ticker/"+symbol, false, null).then(function(resp) {
-            logger.info("Ticker for symbol "+symbol+" response = "+ JSON.stringify(resp, null, 2))
+            logger.info("Ticker for symbol "+symbol+" successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Ticker request = "+ JSON.stringify(error, null, 2))
@@ -101,7 +101,7 @@ var tickers = function(symbol) {
     logger.info("TradeIO Tickers Request")
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint+"/api/v1/tickers", false, null).then(function(resp) {
-            logger.info("Tickers response = "+ JSON.stringify(resp, null, 2))
+            logger.info("Tickers successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Tickers request = "+ JSON.stringify(error, null, 2))
@@ -132,7 +132,7 @@ var newOrder = function(symbol, side, type, quantity, price, stopPrice) {
             order.StopPrice = stopPrice
 
         http.post(process.env.APIEndpoint+"/api/v1/order", order).then(function(resp) {
-            logger.info("New Order response = "+ JSON.stringify(resp, null, 2))
+            logger.info("New Order successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing New order request = "+ JSON.stringify(error, null, 2))
@@ -150,7 +150,7 @@ var cancelOrder = function(orderId) {
         var ts = new Date().getTime();
 
         http.del(process.env.APIEndpoint+"/api/v1/order/"+orderId, "?ts="+ts).then(function(resp) {
-            logger.info("Cancel response = "+ JSON.stringify(resp, null, 2))
+            logger.info("Cancel successful")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Cancel order request = "+ JSON.stringify(error, null, 2))
@@ -168,7 +168,7 @@ var cancelAllOrders = function() {
         var ts = new Date().getTime();
 
         http.del(process.env.APIEndpoint+"/api/v1/orders", "?ts="+ts).then(function(resp) {
-            logger.info("Cancel orders response = "+ JSON.stringify(resp, null, 2))
+            logger.info("Cancel orders successfull")
             resolve(resp)
         }, function(error){
             logger.error("Error while doing Cancel all orders request = "+ JSON.stringify(error, null, 2))
