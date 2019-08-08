@@ -125,6 +125,7 @@ var newOrder = function(symbol, side, type, quantity, price, stopPrice) {
             "Quantity": quantity,
             "ts": ""+ts
         }
+        logger.info("\t Order :", JSON.stringify(order, null, 2))
 
         if(price)
             order.Price = price

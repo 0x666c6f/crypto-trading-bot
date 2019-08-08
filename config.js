@@ -18,6 +18,7 @@ try {
     process.env.Timezone = doc.config.Timezone;
     process.env.Simulation = doc.config.Simulation;
     process.env.Fees = doc.config.Fees;
+    process.env.LogLevel = doc.config.LogLevel;
     process.env.Exclusions = doc.config.Exclusions.toString().split(',')
     logger.info("Loaded config :")
     logger.info(JSON.stringify(process.env, null, 2));
