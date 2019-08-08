@@ -31,4 +31,13 @@ var formatTickers = function(tickers) {
     return formattedTickers;
 }
 
+var formatInfos = function (infos) {
+    let formattedInfos = new Map();
+    infos.forEach(info => {
+        formattedInfos.set(info.symbol, info);
+    });
+    return formattedInfos;
+}
+
 exports.formatTickers = formatTickers;
+exports.formatInfos = formatInfos;

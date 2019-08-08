@@ -12,6 +12,7 @@ config:
   Timezone: xxx
   Simulation: true
   Fees: 0.1
+  LogLevel: INFO
   Exclusions:
     - ktos
     - btnt
@@ -23,3 +24,4 @@ config:
     - xfrc
     - usdt
     - xrr
+    - ttv
