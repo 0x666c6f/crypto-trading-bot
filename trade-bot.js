@@ -2,19 +2,23 @@ var tradeio = require('./tradeio')
 var trading_utils = require('./trading-utils')
 var logger = require('./logger');
 var weight = 0;
-
-var launchArbitrage = function (symbol) {
+var val_btc = null;
+var val_btc_eth = null;
+var val_eth = null;
+var launchArbitrage = function () {
     tradeio.info().then(function (infos) {
         infos = trading_utils.formatInfos(infos.symbols);
         tradeio.tickers().then(function (tickers) {
             let formattedTickers = trading_utils.formatTickers(tickers.tickers)
-            let val_btc = formattedTickers.get('btc_usdt').askPrice;
-            let val_btc_eth = formattedTickers.get('eth_btc').askPrice;
-            let val_eth = formattedTickers.get('eth_usdt').askPrice;
+            val_btc = formattedTickers.get('btc_usdt').askPrice;
+            val_btc_eth = formattedTickers.get('eth_btc').askPrice;
+            val_eth = formattedTickers.get('eth_usdt').askPrice;
 
             let symbols = formattedTickers.get("symbols")
             symbols.forEach(ticker => {
-                manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
+                //manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
+                //manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers,ticker,"btc")
+                manageArbitrageSource_X_Intermediate_Source(formattedTickers,ticker,"eth","btc")
             });
 
 
@@ -26,7 +30,7 @@ var launchArbitrage = function (symbol) {
 ///////// BTC TO XXX TO ETH TO BTC //////////
 ////////////////////////////////////////////
 var manageArbitrageBTCtoXtoETHtoBTC = function (tickers, infos, symbol) {
-    logger.info("Launching arbitrage : <BTC TO " + symbol + " TO ETH TO BTC>")
+    logger.info("Checking arbitrage : <BTC TO " + symbol + " TO ETH TO BTC>")
     let ticker_btc = tickers.get(symbol + "_btc")
     let ticker_eth = tickers.get(symbol + "_eth")
     let ticker_eth_btc = tickers.get("eth_btc")
@@ -121,11 +125,11 @@ var manageArbitrageBTCtoXtoETHtoBTC = function (tickers, infos, symbol) {
 /////// USDT TO XXX TO BTC TO USDT //////////
 ////////////////////////////////////////////
 var manageArbitrageUSDT_X_Intermediate_USDT = function (tickers, symbol, intermediate) {
-    logger.info("Launching arbitrage : <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
+    logger.info("Checking arbitrage : <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
 
     let ticker_usdt = tickers.get(symbol + "_usdt")
     let ticker_intermediate = tickers.get(symbol + "_" + intermediate)
-    let ticker_intermediate_usdt = tickers.get(intermediate + "_" + usdt)
+    let ticker_intermediate_usdt = tickers.get(intermediate + "_usdt")
 
     if (ticker_usdt &&
         ticker_intermediate &&
@@ -235,13 +239,13 @@ var manageArbitrageUSDT_X_Intermediate_USDT = function (tickers, symbol, interme
 ///////  BTC TO XXX TO USDT TO BTC //////////
 ////////////////////////////////////////////
 var manageArbitrageSource_X_Intermediate_Source = function (tickers, symbol, source, intermediate) {
-    logger.info("Launching arbitrage : <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
+    logger.info("Checking arbitrage : <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
 
     //BTC
     let ticker_source = tickers.get(symbol + "_"+source)
     //USDT
     let ticker_intermediate = tickers.get(symbol + "_" + intermediate)
-    let ticker_source_intermediate = tickers.get(intermediate + "_" + usdt)
+    let ticker_source_intermediate = tickers.get(source + "_" + intermediate)
 
 
     if (ticker_source &&
@@ -251,7 +255,7 @@ var manageArbitrageSource_X_Intermediate_Source = function (tickers, symbol, sou
         ticker_intermediate.bidPrice > 0) {
         logger.info("Tickers exists for " + symbol)
 
-        let bonus = ticker_intermediate.bidPrice * ticker_source.askPrice / ticker_source_intermediate.askPrice
+        let bonus = ticker_intermediate.bidPrice / ticker_source.askPrice / ticker_source_intermediate.askPrice
         logger.info(symbol + " bonus -> " + bonus)
 
         if (bonus > 1.004) {
