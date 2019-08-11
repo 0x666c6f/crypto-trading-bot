@@ -5,24 +5,25 @@ var weight = 0;
 var val_btc = null;
 var val_btc_eth = null;
 var val_eth = null;
-var launchArbitrage = function () {
-    tradeio.info().then(function (infos) {
-        infos = trading_utils.formatInfos(infos.symbols);
-        tradeio.tickers().then(function (tickers) {
-            let formattedTickers = trading_utils.formatTickers(tickers.tickers)
-            val_btc = formattedTickers.get('btc_usdt').askPrice;
-            val_btc_eth = formattedTickers.get('eth_btc').askPrice;
-            val_eth = formattedTickers.get('eth_usdt').askPrice;
+var launchArbitrage = function (infos) {
+    tradeio.tickers().then(function (tickers) {
+        weight += 20;
+        let formattedTickers = trading_utils.formatTickers(tickers.tickers)
+        val_btc = formattedTickers.get('btc_usdt').askPrice;
+        val_btc_eth = formattedTickers.get('eth_btc').askPrice;
+        val_eth = formattedTickers.get('eth_usdt').askPrice;
 
-            let symbols = formattedTickers.get("symbols")
-            symbols.forEach(ticker => {
-                //manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
-                //manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers,ticker,"btc")
-                manageArbitrageSource_X_Intermediate_Source(formattedTickers,ticker,"eth","btc")
-            });
+        let symbols = formattedTickers.get("symbols")
+        symbols.forEach(ticker => {
+            //manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
+            //manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers,ticker,"btc")
+            manageArbitrageSource_X_Intermediate_Source(formattedTickers, ticker, "eth", "btc").then(function () {
+                manageArbitrageSource_X_Intermediate_Source(formattedTickers, ticker, "eth", "usdt")
+            })
+
+        });
 
 
-        })
     })
 }
 
@@ -69,6 +70,25 @@ var manageArbitrageBTCtoXtoETHtoBTC = function (tickers, infos, symbol) {
                         tradeio.newOrder(symbol + "_eth", "sell", "limit", qty, price).then(function (resp) {
                             if (resp.order.status == "Completed") {
                                 logger.info("Second trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
+
+                                weight++;
+
+                                price = ticker_eth_btc.bidPrice;
+                                qty = Math.round(qty_ini * ticker_eth.bidPrice, infos.get("eth_btc").baseAssetPrecision)
+
+                                tradeio.newOrder("eth_btc", "sell", "limit", qty, price).then(function (resp) {
+                                    if (resp.order.status == "Completed") {
+                                        logger.info("Third trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
+                                    } else {
+                                        logger.warn("Third trade has failed for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>, canceling order")
+                                        tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
+                                            if (resp.order.status == "Canceled") {
+                                                logger.warn("Third trade successful canceled for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
+                                            }
+                                        })
+                                    }
+                                })
+                                weight++;
                             } else {
                                 logger.warn("First trade has failed for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>, canceling order")
                                 tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
@@ -78,24 +98,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = function (tickers, infos, symbol) {
                                 })
                             }
                         })
-                        weight++;
 
-                        price = ticker_eth_btc.bidPrice;
-                        qty = Math.round(qty_ini * ticker_eth.bidPrice, infos.get("eth_btc").baseAssetPrecision)
-
-                        tradeio.newOrder("eth_btc", "sell", "limit", qty, price).then(function (resp) {
-                            if (resp.order.status == "Completed") {
-                                logger.info("Third trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
-                            } else {
-                                logger.warn("Third trade has failed for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>, canceling order")
-                                tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
-                                    if (resp.order.status == "Canceled") {
-                                        logger.warn("Third trade successful canceled for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
-                                    }
-                                })
-                            }
-                        })
-                        weight++;
 
                         //sleep
                         //manageArbitrageETH_BTC(tickers, infos, symbol)
@@ -143,17 +146,17 @@ var manageArbitrageUSDT_X_Intermediate_USDT = function (tickers, symbol, interme
 
         if (bonus > 1.004) {
             logger.info("Found positive trade")
-           
+
             var minIntermediate;
-            if (intermediate =="eth")
+            if (intermediate == "eth")
                 minIntermediate = process.env.MinETH
-            else 
+            else
                 minIntermediate = process.env.MinBTC
 
             var valIntermediate;
-            if (intermediate =="eth")
+            if (intermediate == "eth")
                 valIntermediate = val_eth
-            else 
+            else
                 valIntermediate = val_btc
 
             if (ticker_usdt.askPrice * ticker_usdt.askQty > process.env.MinUSDT && ticker_intermediate.bidQty * ticker_intermediate.bidPrice > minIntermediate && ticker_intermediate.bidPrice * ticker_intermediate.bidQty * valIntermediate > process.env.MinUSDT) {
@@ -162,7 +165,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = function (tickers, symbol, interme
                 let price = ticker_usdt.askPrice
                 let qty = Math.min(process.env.MaxUSDT / price, ticker_usdt.askQty, ticker_intermediate.bidQty)
                 qty = Math.round(qty, infos.get(ticker_usdt.baseAssetPrecision))
-                var qty_ini = Math.round(Math.min(process.env.MaxUSDT / price, ticker_usdt.askQty, ticker_intermediate.bidQty), infos.get(symbol + "_"+intermediate).baseAssetPrecision);
+                var qty_ini = Math.round(Math.min(process.env.MaxUSDT / price, ticker_usdt.askQty, ticker_intermediate.bidQty), infos.get(symbol + "_" + intermediate).baseAssetPrecision);
                 weight++
 
                 console.log(price)
@@ -175,10 +178,29 @@ var manageArbitrageUSDT_X_Intermediate_USDT = function (tickers, symbol, interme
                         logger.info("First trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
                         let price = ticker_intermediate.bidPrice
                         let qty = qty_ini
-                        qty = Math.round(qty_ini / 1.001, infos.get(symbol + "_" +intermediate).baseAssetPrecision)
-                        tradeio.newOrder(symbol + "_"+intermediate, "sell", "limit", qty, price).then(function (resp) {
+                        qty = Math.round(qty_ini / 1.001, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+                        tradeio.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price).then(function (resp) {
                             if (resp.order.status == "Completed") {
                                 logger.info("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
+
+                                weight++;
+
+                                price = ticker_intermediate_usdt.bidPrice;
+                                qty = Math.round(qty_ini * ticker_intermediate.bidPrice, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+
+                                tradeio.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price).then(function (resp) {
+                                    if (resp.order.status == "Completed") {
+                                        logger.info("Third trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
+                                    } else {
+                                        logger.warn("Third trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>, canceling order")
+                                        tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
+                                            if (resp.order.status == "Canceled") {
+                                                logger.warn("Third trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
+                                            }
+                                        })
+                                    }
+                                })
+                                weight++;
                             } else {
                                 logger.warn("First trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>, canceling order")
                                 tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
@@ -188,24 +210,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = function (tickers, symbol, interme
                                 })
                             }
                         })
-                        weight++;
 
-                        price = ticker_intermediate_usdt.bidPrice;
-                        qty = Math.round(qty_ini * ticker_intermediate.bidPrice, infos.get(symbol+"_"+intermediate).baseAssetPrecision)
-
-                        tradeio.newOrder(symbol+"_"+intermediate, "sell", "limit", qty, price).then(function (resp) {
-                            if (resp.order.status == "Completed") {
-                                logger.info("Third trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
-                            } else {
-                                logger.warn("Third trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>, canceling order")
-                                tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
-                                    if (resp.order.status == "Canceled") {
-                                        logger.warn("Third trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
-                                    }
-                                })
-                            }
-                        })
-                        weight++;
 
                         //sleep
                         //manageArbitrageETH_BTC(tickers, infos, symbol)
@@ -239,144 +244,143 @@ var manageArbitrageUSDT_X_Intermediate_USDT = function (tickers, symbol, interme
 ///////  BTC TO XXX TO USDT TO BTC //////////
 ////////////////////////////////////////////
 var manageArbitrageSource_X_Intermediate_Source = function (tickers, symbol, source, intermediate) {
-    logger.info("Checking arbitrage : <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
+    logger.info("Checking arbitrage : <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
 
-    //BTC
-    let ticker_source = tickers.get(symbol + "_"+source)
-    //USDT
-    let ticker_intermediate = tickers.get(symbol + "_" + intermediate)
-    let ticker_source_intermediate = tickers.get(source + "_" + intermediate)
-
-
-    if (ticker_source &&
-        ticker_intermediate &&
-        process.env.Exclusions.indexOf(symbol) == -1 &&
-        ticker_source.askPrice > 0 &&
-        ticker_intermediate.bidPrice > 0) {
-        logger.info("Tickers exists for " + symbol)
-
-        let bonus = ticker_intermediate.bidPrice / ticker_source.askPrice / ticker_source_intermediate.askPrice
-        logger.info(symbol + " bonus -> " + bonus)
-
-        if (bonus > 1.004) {
-            logger.info("Found positive trade")
-           
-            var minIntermediate;
-            var maxIntermediate;
-            if (intermediate =="eth"){
-                minIntermediate = process.env.MinETH
-                maxIntermediate = process.env.MaxETH
-            } else if(intermediate == "btc"){
-                minIntermediate = process.env.MinBTC
-                maxIntermediate = process.env.MaxBTC
-            }
-            else {
-                minIntermediate = process.env.MinUSDT
-                maxIntermediate = process.env.MaxUSDT
-            }
-
-            var minSource;
-            var maxSource;
-            if (source =="seth"){
-                minSource = process.env.MinETH
-                maxSource = process.env.MaxETH
-            }
-            else if(source == "btc"){
-                minSource = process.env.MinBTC
-                maxSource = process.env.MaxBTC
-            }
-            else {
-                minSource = process.env.MinUSDT
-                maxSource = process.env.MaxUSDT
-            }
-
-            var valIntermediate;
-            if (intermediate =="eth")
-                valIntermediate = val_eth
-            else if(intermediate == "btc")
-                valIntermediate = val_btc
-            else 
-                valIntermediate = val_btc_eth
-
-            var valSource;
-            if (source =="eth")
-                valSource = val_eth
-            else if(source == "btc")
-                valSource = val_btc
-            else 
-                valSource = val_btc_eth
+    return new Promise(function (resolve, reject) {
+        //BTC
+        let ticker_source = tickers.get(symbol + "_" + source)
+        //USDT
+        let ticker_intermediate = tickers.get(symbol + "_" + intermediate)
+        let ticker_source_intermediate = tickers.get(source + "_" + intermediate)
 
 
-            if (ticker_intermediate.bidPrice * ticker_intermediate.bidQty > minIntermediate && ticker_source.askQty * ticker_source.askPrice > minSource && ticker_source.askPrice * ticker_source.askQty * valSource > minIntermediate) {
-                logger.info("Quantity is enough for trade for symbol " + symbol)
+        if (ticker_source &&
+            ticker_intermediate &&
+            process.env.Exclusions.indexOf(symbol) == -1 &&
+            ticker_source.askPrice > 0 &&
+            ticker_intermediate.bidPrice > 0) {
+            logger.info("Tickers exists for " + symbol)
 
-                let price = ticker_source.askPrice
-                let qty = Math.min(maxSource / price, ticker_intermediate.bidQty, ticker_source.askQty)
-                qty = Math.round(qty, infos.get(symbol+"_"+source))
-                var qty_ini = Math.round(Math.min(maxSource / price, ticker_source.askQty, ticker_intermediate.bidQty), infos.get(symbol + "_"+source).baseAssetPrecision);
-                weight++
+            let bonus = ticker_intermediate.bidPrice / ticker_source.askPrice / ticker_source_intermediate.askPrice
+            logger.info(symbol + " bonus -> " + bonus)
 
-                console.log(price)
-                console.log(qty)
-                console.log(qty_ini)
-                logger.info("Initiating order for symbol " + symbol)
+            if (bonus > 1.004) {
+                logger.info("Found positive trade")
 
-                tradeio.newOrder(symbol + "_btc", "buy", "limit", qty, price).then(function (resp) {
-                    if (resp.order.status == "Completed") {
-                        logger.info("First trade successful for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
-                        let price = ticker_intermediate.bidPrice
-                        let qty = qty_ini
-                        qty = Math.round(qty_ini / 1.001, infos.get(symbol + "_" +intermediate).baseAssetPrecision)
+                var minIntermediate;
+                var maxIntermediate;
+                if (intermediate == "eth") {
+                    minIntermediate = process.env.MinETH
+                    maxIntermediate = process.env.MaxETH
+                } else if (intermediate == "btc") {
+                    minIntermediate = process.env.MinBTC
+                    maxIntermediate = process.env.MaxBTC
+                } else {
+                    minIntermediate = process.env.MinUSDT
+                    maxIntermediate = process.env.MaxUSDT
+                }
 
-                        tradeio.newOrder(symbol + "_"+intermediate, "sell", "limit", qty, price).then(function (resp) {
-                            if (resp.order.status == "Completed") {
-                                logger.info("Second trade successful for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
-                            } else {
-                                logger.warn("First trade has failed for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">, canceling order")
-                                tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
-                                    if (resp.order.status == "Canceled") {
-                                        logger.warn("Second trade successful canceled for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
-                                    }
-                                })
-                            }
-                        })
-                        weight++;
+                var minSource;
+                var maxSource;
+                if (source == "seth") {
+                    minSource = process.env.MinETH
+                    maxSource = process.env.MaxETH
+                } else if (source == "btc") {
+                    minSource = process.env.MinBTC
+                    maxSource = process.env.MaxBTC
+                } else {
+                    minSource = process.env.MinUSDT
+                    maxSource = process.env.MaxUSDT
+                }
 
-                        price = ticker_source_intermediate.askPrice;
-                        qty = Math.round(qty_ini * ticker_source.askPrice, infos.get(symbol+"_"+intermediate).baseAssetPrecision)
+                var valIntermediate;
+                if (intermediate == "eth")
+                    valIntermediate = val_eth
+                else if (intermediate == "btc")
+                    valIntermediate = val_btc
+                else
+                    valIntermediate = val_btc_eth
 
-                        tradeio.newOrder(symbol+"_"+intermediate, "sell", "limit", qty, price).then(function (resp) {
-                            if (resp.order.status == "Completed") {
-                                logger.info("Third trade successful for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
-                            } else {
-                                logger.warn("Third trade has failed for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">, canceling order")
-                                tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
-                                    if (resp.order.status == "Canceled") {
-                                        logger.warn("Third trade successful canceled for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">")
-                                    }
-                                })
-                            }
-                        })
-                        weight++;
+                var valSource;
+                if (source == "eth")
+                    valSource = val_eth
+                else if (source == "btc")
+                    valSource = val_btc
+                else
+                    valSource = val_btc_eth
 
-                        //sleep
-                        //manageArbitrageETH_BTC(tickers, infos, symbol)
-                    } else {
-                        logger.warn("First trade has failed for arbitrage <"+source+" TO " + symbol + " TO " + intermediate + " TO "+source+">, canceling order")
-                        weight++;
-                        tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
 
+                if (ticker_intermediate.bidPrice * ticker_intermediate.bidQty > minIntermediate && ticker_source.askQty * ticker_source.askPrice > minSource && ticker_source.askPrice * ticker_source.askQty * valSource > minIntermediate) {
+                    logger.info("Quantity is enough for trade for symbol " + symbol)
+
+                    let price = ticker_source.askPrice
+                    let qty = Math.min(maxSource / price, ticker_intermediate.bidQty, ticker_source.askQty)
+                    qty = Math.round(qty, infos.get(symbol + "_" + source))
+                    var qty_ini = Math.round(Math.min(maxSource / price, ticker_source.askQty, ticker_intermediate.bidQty), infos.get(symbol + "_" + source).baseAssetPrecision);
+                    weight++
+
+                    console.log(price)
+                    console.log(qty)
+                    console.log(qty_ini)
+                    logger.info("Initiating order for symbol " + symbol)
+
+                    tradeio.newOrder(symbol + "_btc", "buy", "limit", qty, price).then(function (resp) {
+                        if (resp.order.status == "Completed") {
+                            logger.info("First trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                            let price = ticker_intermediate.bidPrice
+                            let qty = qty_ini
+                            qty = Math.round(qty_ini / 1.001, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+
+                            tradeio.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price).then(function (resp) {
+                                if (resp.order.status == "Completed") {
+                                    logger.info("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                                    weight++;
+
+                                    price = ticker_source_intermediate.askPrice;
+                                    qty = Math.round(qty_ini * ticker_source.askPrice, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+
+                                    tradeio.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price).then(function (resp) {
+                                        if (resp.order.status == "Completed") {
+                                            logger.info("Third trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                                        } else {
+                                            logger.warn("Third trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
+                                            tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
+                                                if (resp.order.status == "Canceled") {
+                                                    logger.warn("Third trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                                                }
+                                            })
+                                        }
+                                    })
+                                    weight++;
+                                } else {
+                                    logger.warn("First trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
+                                    tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
+                                        if (resp.order.status == "Canceled") {
+                                            logger.warn("Second trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                                        }
+                                    })
+                                }
+                            })
+
+
+                            //sleep
                             //manageArbitrageETH_BTC(tickers, infos, symbol)
-                        })
-                    }
-                })
-            } else {
-                logger.warn("Not enough quantity for trade for symbol " + symbol)
+                        } else {
+                            logger.warn("First trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
+                            weight++;
+                            tradeio.cancelOrder(resp.order.orderId).then(function (resp) {
+
+                                //manageArbitrageETH_BTC(tickers, infos, symbol)
+                            })
+                        }
+                    })
+                } else {
+                    logger.warn("Not enough quantity for trade for symbol " + symbol)
+
+                }
 
             }
-
         }
-    }
-
+    })
 }
 exports.launchArbitrage = launchArbitrage;
