@@ -2,13 +2,19 @@ config:
   APIKey: XXX
   APISecret: XXX
   APIEndpoint: https://api.exchange.trade.io
-  MinBTC: xxx
-  MaxBTC: xxx
-  MinETH: xxx
-  MaxETH: xxx
-  MinUSDT: xxx
-  MaxUSDT: xxx
-  MinProfit: xxx
+  MinBTC: 0
+  MaxBTC: 0
+  MinETH: 0.01
+  MaxETH: 0.1
+  MinUSDT: 0
+  MaxUSDT: 0
+  MinProfit: 1.0031
+  OrderMinuteLimit: 600
+  OrderHourlyLimit : 3600
+  OrderDailyLimit : 86000
+  APIMinuteLimit: 1200
+  APIHourlyLimit : 60000
+  APIDailyLimit : 1400000
   Timezone: xxx
   Simulation: true
   Fees: 0.1
