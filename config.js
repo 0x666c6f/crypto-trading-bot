@@ -1,7 +1,13 @@
 const yaml = require('js-yaml');
 const fs   = require('fs');
-const logger = require('./logger');
-logger.info("Loading config from file")
+const log = require('ololog').configure({
+  time: true
+})
+const ansi = require('ansicolor').nice
+log("Loading config from file")
+
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+
 try {
   var doc = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
   if(doc){
@@ -20,12 +26,18 @@ try {
     process.env.Fees = doc.config.Fees;
     process.env.LogLevel = doc.config.LogLevel;
     process.env.Exclusions = doc.config.Exclusions.toString().split(',')
-    logger.info("Loaded config :")
-    logger.info(JSON.stringify(process.env, null, 2));
+    process.env.OrderMinuteLimit = doc.config.OrderMinuteLimit
+    process.env.OrderHourlyLimit = doc.config.OrderHourlyLimit
+    process.env.OrderDailyLimit = doc.config.OrderDailyLimit
+    process.env.APIMinuteLimit = doc.config.APIMinuteLimit
+    process.env.APIHourlyLimit = doc.config.APIHourlyLimit
+    process.env.APIDailyLimit = doc.config.APIDailyLimit
+    log("Loaded config :")
+    log(process.env);
   } else {
-      logger.error("Config file not found, exiting")
-      pprocess.exit(-1);
+      log.red("Config file not found, exiting")
+      process.exit(-1);
   }
 } catch (e) {
-  console.log(e);
+  log(e);
 }

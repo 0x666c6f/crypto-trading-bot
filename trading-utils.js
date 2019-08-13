@@ -1,4 +1,3 @@
-
 var formatTickers = function(tickers) {
     let formattedTickers = new Map();
     let ethPairs = new Array();
@@ -39,5 +38,11 @@ var formatInfos = function (infos) {
     return formattedInfos;
 }
 
+var generateSignature = function(args){
+    return crypto.createHmac('sha512', process.env.APISecret).update(args).digest('hex');
+}
+
+
 exports.formatTickers = formatTickers;
 exports.formatInfos = formatInfos;
+exports.generateSignature = generateSignature;

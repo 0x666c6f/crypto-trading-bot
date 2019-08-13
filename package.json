@@ -17,8 +17,12 @@
   },
   "homepage": "https://github.com/florianpautot/go-crypto-bot#readme",
   "dependencies": {
+    "cron": "^1.7.1",
     "js-yaml": "^3.13.1",
+    "moment": "^2.24.0",
+    "ololog": "^1.1.146",
     "request": "^2.88.0",
+    "sleep": "^6.1.0",
     "winston": "^3.2.1"
   }
 }

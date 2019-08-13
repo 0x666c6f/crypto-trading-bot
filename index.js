@@ -1,7 +1,13 @@
-var logger = require('./logger');
 var http = require('./http-manager');
 var tradeio = require('./tradeio');
-var tradebot = require('./trade-bot')
+var arbitrageBot = require('./arbitrage-bot')
+var trading_utils = require('./trading-utils')
+var sleep = require('sleep');
+const log = require('ololog').configure({
+    time: true
+})
+const moment = require("moment")
+
 require('./config.js')
 
 
@@ -38,4 +44,8 @@ require('./config.js')
 //     })
 // })
 
-tradebot.launchArbitrage("eth")
+tradeio.info().then(function (infos) {
+    infos = trading_utils.formatInfos(infos.symbols);
+    arbitrageBot.start(infos)
+});
+
