@@ -8,14 +8,14 @@ config:
   MaxETH: 0.1
   MinUSDT: 0
   MaxUSDT: 0
-  MinProfit: 1.0031
+  MinProfit: 1.003
   OrderMinuteLimit: 600
   OrderHourlyLimit : 3600
   OrderDailyLimit : 86000
   APIMinuteLimit: 1200
   APIHourlyLimit : 60000
   APIDailyLimit : 1400000
-  Timezone: xxx
+  Timeout: 800
   Simulation: true
   Fees: 0.1
   LogLevel: INFO

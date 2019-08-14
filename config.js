@@ -21,7 +21,7 @@ try {
     process.env.MinUSDT = doc.config.MinUSDT;
     process.env.MaxUSDT = doc.config.MaxUSDT;
     process.env.MinProfit = doc.config.MinProfit;
-    process.env.Timezone = doc.config.Timezone;
+    process.env.Timeout = doc.config.Timeout;
     process.env.Simulation = doc.config.Simulation;
     process.env.Fees = doc.config.Fees;
     process.env.LogLevel = doc.config.LogLevel;
@@ -32,6 +32,7 @@ try {
     process.env.APIMinuteLimit = doc.config.APIMinuteLimit
     process.env.APIHourlyLimit = doc.config.APIHourlyLimit
     process.env.APIDailyLimit = doc.config.APIDailyLimit
+    
     log("Loaded config :")
     log(process.env);
   } else {
