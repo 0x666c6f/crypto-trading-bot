@@ -36,7 +36,7 @@ var start = async function (infos) {
             log("Hourly Order Weight :", totalHourlyOrderWeight)
             while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3)) {
                 await launchArbitrage(infos)
-                sleep.msleep(800);
+                sleep.msleep(process.env.Timeout);
                 log("Arbitrages finished")
                 log("Minute Weights :")
                 log("Minute Weight :", totalMinuteWeight)
@@ -385,7 +385,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
 
                 var minSource;
                 var maxSource;
-                if (source == "seth") {
+                if (source == "eth") {
                     minSource = process.env.MinETH
                     maxSource = process.env.MaxETH
                 } else if (source == "btc") {
@@ -434,7 +434,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     totalHourlyWeight++;
                     totalHourlyOrderWeight++;
 
-                    if (orderA.order.status == "Completed") {
+                    if (orderA.code === 0 && orderA.order.status == "Completed") {
                         log.green("First trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
                         let price = tickerIntermediate.bidPrice
                         let qty = qtyIni
@@ -452,7 +452,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
 
-                        if (orderB.order.status == "Completed") {
+                        if (orderB.code === 0 && orderB.order.status == "Completed") {
                             log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
 
        
@@ -472,7 +472,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                             totalHourlyWeight++;
                             totalHourlyOrderWeight++;
 
-                            if (orderC.order.status == "Completed") {
+                            if (orderC.code === 0 && orderC.order.status == "Completed") {
                                 log.green("Third trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
                             } else {
                                 log.warn("Third trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
