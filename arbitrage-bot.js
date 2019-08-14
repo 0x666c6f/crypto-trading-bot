@@ -21,16 +21,21 @@ var valBtcEth = null;
 var valETH = null;
 
 var start = async function (infos) {
-    var startDayDate = new Date();
+    var startDayDate = moment();
+    var endDayDate = startDayDate.add(1,"day")
     log("Starting Arbitrage at ", startDayDate)
     log(totalDailyOrderWeight, process.env.OrderDailyLimit)
     while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3)) {
-        var startHourDate = new Date();
+        var startHourDate = moment();
+        var endHourDate = startHourDate.add(1,"hour");
+
         log("Daily Weights :")
         log("Daily Weight :", totalDailyWeight)
         log("Daily Order Weight :", totalDailyOrderWeight)
         while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3)) {
-            var startMinuteDate = new Date();
+            var startMinuteDate = moment();
+            var endMinuteDate = startMinuteDate.add(1,"minute")
+            
             log("Hourly Weights :")
             log("Hourly Weight :", totalHourlyWeight)
             log("Hourly Order Weight :", totalHourlyOrderWeight)
@@ -45,12 +50,9 @@ var start = async function (infos) {
             }
             totalMinuteWeight = 0;
             totalMinuteOrderWeight = 0;
-            if (new Date().getMinutes() == startMinuteDate.getMinutes()) {
-                let now = moment();
-                let val = moment().endOf('minute');
-
-                let ms = val.diff(now, 'milliseconds');
-
+            let now = moment();
+            if (now.get("minute") == startMinuteDate.get("minute")) {
+                let ms = now.diff(endMinuteDate, 'milliseconds');
                 log("Will sleep", ms, "to reset minute weight")
                 sleep.msleep(ms + 1000)
                 log("Waking up, sleep is over !")
@@ -59,11 +61,9 @@ var start = async function (infos) {
         }
         totalHourlyWeight = 0;
         totalHourlyOrderWeight = 0;
-        if (new Date().getHours() == startHourDate.getHours()) {
-            let now = moment();
-            let val = moment().endOf('hour');
-
-            let ms = val.diff(now, 'milliseconds');
+        let now = moment();
+        if (now.get("hour") == startHourDate.get("hour")) {
+            let ms = now.diff(endHourDate, 'milliseconds');
 
             log("Will sleep", ms, "to reset hour weight")
             sleep.msleep(ms + 1000)
@@ -74,12 +74,9 @@ var start = async function (infos) {
     }
     totalDailyWeight = 0;
     totalDailyOrderWeight = 0;
-    if (new Date().getDay() == startDayDate.getDay()) {
-        let now = moment();
-        let val = moment().endOf('day');
-
-        let ms = val.diff(now, 'milliseconds');
-
+    let now = moment();
+    if (now.get("day") == startDayDate.get("day")) {
+        let ms = now.diff(endDayDate, 'milliseconds');
         log("Will sleep", ms, "to reset day weight")
         sleep.msleep(ms + 1000)
         log("Waking up, sleep is over !")
@@ -299,7 +296,8 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         totalDailyWeight++;
 
                         price = tickerIntermediateUSDT.bidPrice;
-                        qty = Math.round(qtyIni * tickerIntermediate.bidPrice, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+
+                        qty = Math.round(qtyIni * tickerIntermediate.bidPrice * intermediatePower)/intermediatePower
 
                         let orderC = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
 
