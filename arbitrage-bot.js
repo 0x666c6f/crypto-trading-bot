@@ -21,20 +21,17 @@ var valBtcEth = null;
 var valETH = null;
 
 var start = async function (infos) {
-    var startDayDate = moment();
-    var endDayDate = startDayDate.add(1,"day")
-    log("Starting Arbitrage at ", startDayDate)
+    var endDayDate = moment().add(1,"day")
+    log("Starting Arbitrage")
     log(totalDailyOrderWeight, process.env.OrderDailyLimit)
     while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3)) {
-        var startHourDate = moment();
-        var endHourDate = startHourDate.add(1,"hour");
+        var endHourDate =  moment().add(1,"hour");
 
         log("Daily Weights :")
         log("Daily Weight :", totalDailyWeight)
         log("Daily Order Weight :", totalDailyOrderWeight)
         while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3)) {
-            var startMinuteDate = moment();
-            var endMinuteDate = startMinuteDate.add(1,"minute")
+            var endMinuteDate = moment().add(1,"minute")
             
             log("Hourly Weights :")
             log("Hourly Weight :", totalHourlyWeight)
@@ -51,8 +48,8 @@ var start = async function (infos) {
             totalMinuteWeight = 0;
             totalMinuteOrderWeight = 0;
             let now = moment();
-            if (now.get("minute") == startMinuteDate.get("minute")) {
-                let ms = now.diff(endMinuteDate, 'milliseconds');
+            if (now.isBefore(endMinuteDate)) {
+                let ms = endMinuteDate.diff(now, 'milliseconds');
                 log("Will sleep", ms, "to reset minute weight")
                 sleep.msleep(ms + 1000)
                 log("Waking up, sleep is over !")
@@ -62,8 +59,8 @@ var start = async function (infos) {
         totalHourlyWeight = 0;
         totalHourlyOrderWeight = 0;
         let now = moment();
-        if (now.get("hour") == startHourDate.get("hour")) {
-            let ms = now.diff(endHourDate, 'milliseconds');
+        if (now.isBefore(endHourDate)) {
+            let ms = endHourDate.diff(now, 'milliseconds');
 
             log("Will sleep", ms, "to reset hour weight")
             sleep.msleep(ms + 1000)
@@ -75,8 +72,8 @@ var start = async function (infos) {
     totalDailyWeight = 0;
     totalDailyOrderWeight = 0;
     let now = moment();
-    if (now.get("day") == startDayDate.get("day")) {
-        let ms = now.diff(endDayDate, 'milliseconds');
+    if (now.isBefore(endDayDate)) {
+        let ms = endDayDate.diff(now, 'milliseconds');
         log("Will sleep", ms, "to reset day weight")
         sleep.msleep(ms + 1000)
         log("Waking up, sleep is over !")
