@@ -36,7 +36,8 @@ var start = async function (infos) {
             log("Hourly Order Weight :", totalHourlyOrderWeight)
             while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3)) {
                 await launchArbitrage(infos)
-                sleep.msleep(process.env.Timeout);
+                if(process.env.Timeout != 0)
+                    sleep.msleep(process.env.Timeout);
                 log("Arbitrages finished")
                 log("Minute Weights :")
                 log("Minute Weight :", totalMinuteWeight)
@@ -245,6 +246,8 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
     let tickerUSDT = tickers.get(symbol + "_usdt")
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate)
     let tickerIntermediateUSDT = tickers.get(intermediate + "_usdt")
+    let usdtPower = Math.pow(10, infos.get(symbol + "_usdt").baseAssetPrecision)
+    let intermediatePower = Math.pow(10, infos.get(symbol + "_"+intermediate).baseAssetPrecision)
 
     if (tickerUSDT &&
         tickerIntermediate &&
@@ -276,8 +279,8 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 
                 let price = tickerUSDT.askPrice
                 let qty = Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty)
-                qty = Math.round(qty, infos.get(tickerUSDT.baseAssetPrecision))
-                var qtyIni = Math.round(Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty), infos.get(symbol + "_" + intermediate).baseAssetPrecision);
+                qty = Math.round(qty*usdtPower)/usdtPower
+                var qtyIni = Math.round(Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty) * intermediatePower) /intermediatePower;
                 totalDailyWeight++
 
                 log("Initiating order for symbol " + symbol)
@@ -287,8 +290,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                 if (orderA.order.status == "Completed") {
                     log.green("First trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
                     let price = tickerIntermediate.bidPrice
-                    let qty = qtyIni
-                    qty = Math.round(qtyIni / 1.001, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+                    let qty = Math.round(qtyIni / 1.001 * intermediatePower) / intermediatePower
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
 
                     if (orderB.order.status == "Completed") {
@@ -418,8 +420,9 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
 
                     let price = tickerSource.askPrice
                     let qty = Math.min(maxSource / price, tickerIntermediate.bidQty, tickerSource.askQty)
-                    qty = Math.round(qty, infos.get(symbol + "_" + source))
-                    var qtyIni = Math.round(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty), infos.get(symbol + "_" + source).baseAssetPrecision);
+                    var sourcePower = Math.pow(10,infos.get(symbol + "_" + source).baseAssetPrecision)
+                    qty = Math.round(qty * sourcePower) / sourcePower
+                    var qtyIni = Math.round(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty) * sourcePower) / sourcePower;
 
                     log.green("Initiating order for symbol " + symbol)
 
@@ -437,10 +440,10 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     if (orderA.code === 0 && orderA.order.status == "Completed") {
                         log.green("First trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
                         let price = tickerIntermediate.bidPrice
-                        let qty = qtyIni
-                        qty = Math.round(qtyIni / 1.001, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+                        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+                        let qtyB = Math.round((qtyIni / 1.001) * intermediatePower) /intermediatePower
 
-                        let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
+                        let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qtyB, price);
                         log.green("<",symbol,"> Order B:", orderB)
 
                         totalDailyWeight++;
@@ -458,9 +461,10 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
        
 
                             price = tickerSourceIntermediate.askPrice;
-                            qty = Math.round(qtyIni * tickerSource.askPrice, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+                            let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+                            let qtyC = Math.round(qtyIni * tickerSource.askPrice * intermediatePower) / intermediatePower
 
-                            let orderC = await tradeIO.newOrder(source + "_" + intermediate, "sell", "limit", qty, price);
+                            let orderC = await tradeIO.newOrder(source + "_" + intermediate, "sell", "limit", qtyC, price);
                             log.green("<",symbol,"> Order C:", orderC)
 
                             totalDailyWeight++;
