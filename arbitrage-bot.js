@@ -24,19 +24,19 @@ var start = async function (infos) {
     var endDayDate = moment().add(1,"day")
     log("Starting Arbitrage")
     log(totalDailyOrderWeight, process.env.OrderDailyLimit)
-    while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3)) {
+    while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3) && moment().isBefore(endDayDate)) {
         var endHourDate =  moment().add(1,"hour");
 
         log("Daily Weights :")
         log("Daily Weight :", totalDailyWeight)
         log("Daily Order Weight :", totalDailyOrderWeight)
-        while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3)) {
+        while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3)&& moment().isBefore(endHourDate)) {
             var endMinuteDate = moment().add(1,"minute")
             
             log("Hourly Weights :")
             log("Hourly Weight :", totalHourlyWeight)
             log("Hourly Order Weight :", totalHourlyOrderWeight)
-            while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3)) {
+            while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && moment().isBefore(endMinuteDate)) {
                 await launchArbitrage(infos)
                 if(process.env.Timeout != 0)
                     sleep.msleep(process.env.Timeout);
