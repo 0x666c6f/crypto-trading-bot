@@ -163,7 +163,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                     log.green("First trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
 
                     let price = tickerETH.bidPrice
-                    qty = Math.round(qtyIni / 1.001 * ethPower - 1) / ethPower
+                    qty = Math.round(qtyIni / (1 + process.env.Fees) * ethPower - 1) / ethPower
                     let orderB = await tradeIO.newOrder(symbol + "_eth", "sell", "limit", qty, price);
                     log("Order B response :", orderB)
 
@@ -180,7 +180,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                         totalHourlyOrderWeight++;
 
                         price = tickerEthBtc.bidPrice;
-                        qty = Math.round(qtyIni * tickerETH.bidPrice * ethBtcPower - 1) / ethBtcPower
+                        qty = Math.round(qtyIni / (1 + process.env.Fees) * tickerETH.bidPrice * ethBtcPower - 1) / ethBtcPower
 
                         let orderC = await tradeIO.newOrder("eth_btc", "sell", "limit", qty, price);
                         log("Order C response :", orderC)
@@ -300,7 +300,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     log.green("First trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
 
                     let price = tickerIntermediate.bidPrice
-                    let qty = Math.round(qtyIni / 1.001 * intermediatePower - 1) / intermediatePower
+                    let qty = Math.round(qtyIni / (1 + process.env.Fees) * intermediatePower - 1) / intermediatePower
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
                     log("Order B response :", orderB)
@@ -317,7 +317,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     if (orderB.code === 0 && orderB.order.status == "Completed") {
                         log.green("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
                         price = tickerIntermediateUSDT.bidPrice;
-                        qty = Math.round(qtyIni * tickerIntermediate.bidPrice * intermediateUSDTPower - 1) / intermediateUSDTPower
+                        qty = Math.round(qtyIni /(1 + process.env.Fees) * tickerIntermediate.bidPrice * intermediateUSDTPower - 1) / intermediateUSDTPower
 
                         let orderC = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
                         log("Order C response :", orderC)
@@ -476,7 +476,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     log.green("First trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
 
                     let price = tickerIntermediate.bidPrice
-                    let qtyB = Math.round((qtyIni / 1.001) * intermediatePower - 1) / intermediatePower
+                    let qtyB = Math.round((qtyIni / (1 + process.env.Fees)) * intermediatePower - 1) / intermediatePower
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qtyB, price);
                     log("Order B response :", orderB)
@@ -494,7 +494,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
 
                         $price = $ticker_list['eth_usdt']['askPrice'];
-                        $quantity = round(($quantity_ini) * $ticker_list[$ticketh]['askPrice'], $pairs_infos["eth_usdt"]['baseAssetPrecision'], PHP_ROUND_HALF_UP);
+                        $quantity = round(($quantity_ini) / (1 + process.env.Fees) * $ticker_list[$ticketh]['askPrice'], $pairs_infos["eth_usdt"]['baseAssetPrecision'], PHP_ROUND_HALF_UP);
 
 
                         price = tickerSourceIntermediate.askPrice;
