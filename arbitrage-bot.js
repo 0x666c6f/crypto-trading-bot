@@ -106,7 +106,6 @@ var initArbitrage = async function (infos) {
     valETH = formattedTickers.get('eth_usdt').askPrice;
 
     let symbols = formattedTickers.get("symbols")
-
     for (const ticker of symbols) {
         log(">>> Checking arbitrages for symbol", "<"+ticker.toUpperCase()+">")
         await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
@@ -128,7 +127,6 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
     if (tickerETH &&
         tickerBTC &&
-        process.env.Exclusions.indexOf(symbol) == -1 &&
         tickerBTC.askPrice > 0 &&
         tickerETH.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
@@ -147,11 +145,11 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                 let price = tickerBTC.askPrice
                 let qty = Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty)
                 qty = Math.round(qty * btcPower - 1) / btcPower
-                var qtyIni = Math.round(Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty) * ethPower + 1) / ethPower;
+                var qtyIni = Math.round(Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty) * ethPower - 1) / ethPower;
                 log.green("Initiating order for symbol " + symbol)
 
                 let orderA = await tradeIO.newOrder(symbol + "_btc", "buy", "limit", qty, price);
-
+                log("Order A response :", orderA)
                 totalDailyWeight++;
                 totalDailyOrderWeight++;
 
@@ -161,14 +159,15 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                 totalHourlyWeight++;
                 totalHourlyOrderWeight++;
 
-                if (orderA.order.status == "Completed") {
+                if (orderA.code === 0 && orderA.order.status == "Completed") {
                     log.green("First trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
 
                     let price = tickerETH.bidPrice
                     qty = Math.round(qtyIni / 1.001 * ethPower - 1) / ethPower
                     let orderB = await tradeIO.newOrder(symbol + "_eth", "sell", "limit", qty, price);
+                    log("Order B response :", orderB)
 
-                    if (orderB.order.status == "Completed") {
+                    if (orderB.code === 0 && orderB.order.status == "Completed") {
                         log.green("Second trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
 
                         totalDailyWeight++;
@@ -181,9 +180,10 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                         totalHourlyOrderWeight++;
 
                         price = tickerEthBtc.bidPrice;
-                        qty = Math.round(qtyIni * tickerETH.bidPrice * ethBtcPower + 1) / ethBtcPower
+                        qty = Math.round(qtyIni * tickerETH.bidPrice * ethBtcPower - 1) / ethBtcPower
 
                         let orderC = await tradeIO.newOrder("eth_btc", "sell", "limit", qty, price);
+                        log("Order C response :", orderC)
 
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
@@ -194,7 +194,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
 
-                        if (orderC.order.status == "Completed") {
+                        if (orderC.code === 0 && orderC.order.status == "Completed") {
                             log.green("Third trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
                         } else {
                             log.warn("Third trade has failed for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>, canceling order")
@@ -249,7 +249,6 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 
     if (tickerUSDT &&
         tickerIntermediate &&
-        process.env.Exclusions.indexOf(symbol) == -1 &&
         tickerUSDT.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
@@ -281,11 +280,12 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                 let price = tickerUSDT.askPrice
                 let qty = Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty)
                 qty = Math.round(qty * usdtPower - 1) / usdtPower
-                var qtyIni = Math.round(Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty) * intermediatePower + 1) / intermediatePower;
+                var qtyIni = Math.round(Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty) * intermediatePower - 1) / intermediatePower;
 
                 log("Initiating order for symbol " + symbol)
 
                 let orderA = await tradeIO.newOrder(symbol + "_btc", "buy", "limit", qty, price);
+                log("Order A response :", orderA)
 
                 totalDailyWeight++;
                 totalDailyOrderWeight++;
@@ -296,13 +296,14 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                 totalHourlyWeight++;
                 totalHourlyOrderWeight++;
 
-                if (orderA.order.status == "Completed") {
+                if (orderA.code === 0 && orderA.order.status == "Completed") {
                     log.green("First trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
 
                     let price = tickerIntermediate.bidPrice
                     let qty = Math.round(qtyIni / 1.001 * intermediatePower - 1) / intermediatePower
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
+                    log("Order B response :", orderB)
 
                     totalDailyWeight++;
                     totalDailyOrderWeight++;
@@ -313,12 +314,13 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     totalHourlyWeight++;
                     totalHourlyOrderWeight++;
 
-                    if (orderB.order.status == "Completed") {
+                    if (orderB.code === 0 && orderB.order.status == "Completed") {
                         log.green("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
                         price = tickerIntermediateUSDT.bidPrice;
-                        qty = Math.round(qtyIni * tickerIntermediate.bidPrice * intermediateUSDTPower + 1) / intermediateUSDTPower
+                        qty = Math.round(qtyIni * tickerIntermediate.bidPrice * intermediateUSDTPower - 1) / intermediateUSDTPower
 
                         let orderC = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
+                        log("Order C response :", orderC)
 
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
@@ -329,32 +331,32 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
 
-                        if (orderC.order.status == "Completed") {
+                        if (orderC.code === 0 && orderC.order.status == "Completed") {
                             log.green("Third trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
                         } else {
                             log.warn("Third trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>, canceling order")
-                            tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
-                                if (resp.order.status == "Canceled") {
-                                    log.warn("Third trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
-                                }
-                            })
+                            // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
+                            //     if (resp.order.status == "Canceled") {
+                            //         log.warn("Third trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
+                            //     }
+                            // })
                         }
                     } else {
                         log.warn("First trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>, canceling order")
-                        tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
-                            if (resp.order.status == "Canceled") {
-                                log.warn("Second trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
-                            }
-                        })
+                        // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
+                        //     if (resp.order.status == "Canceled") {
+                        //         log.warn("Second trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
+                        //     }
+                        // })
                     }
                 } else {
                     log.warn("First trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>, canceling order")
-                    totalDailyWeight++;
-                    tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
-                        if (resp.order.status == "Canceled") {
-                            log.warn("First trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
-                        }
-                    })
+                    // totalDailyWeight++;
+                    // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
+                    //     if (resp.order.status == "Canceled") {
+                    //         log.warn("First trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
+                    //     }
+                    // })
                 }
             } else {
                 log.warn("Not enough quantity for trade for symbol " + symbol)
@@ -385,7 +387,6 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
     
     if (tickerSource &&
         tickerIntermediate &&
-        process.env.Exclusions.indexOf(symbol) == -1 &&
         tickerSource.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
@@ -453,14 +454,15 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
             if (tickerIntermediate.bidPrice * tickerIntermediate.bidQty > minIntermediate && tickerSource.askQty * tickerSource.askPrice > minSource && tickerSource.askPrice * tickerSource.askQty * valSourceIntermediate > minIntermediate) {
                 log.green("Quantity is enough for trade for symbol " + symbol)
                 let price = tickerSource.askPrice
-                let qty = Math.min(Math.round(maxSource / price * sourcePower + 1) / sourcePower, tickerIntermediate.bidQty, tickerSource.askQty)
+                let qty = Math.min(Math.round(maxSource / price * sourcePower - 1) / sourcePower, tickerIntermediate.bidQty, tickerSource.askQty)
                 qty = Math.round(qty * sourcePower - 1) / sourcePower
-                var qtyIni = Math.round(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty) * intermediatePower + 1) / intermediatePower;
+                var qtyIni = Math.round(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty) * intermediatePower - 1) / intermediatePower;
 
                 log.green("Initiating order for symbol " + symbol)
 
                 let orderA = await tradeIO.newOrder(symbol + "_" + source, "buy", "limit", qty, price);
-                log.green("<", symbol, "> Order A:", orderA)
+                log("Order A response :", orderA)
+
                 totalDailyWeight++;
                 totalDailyOrderWeight++;
 
@@ -477,7 +479,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     let qtyB = Math.round((qtyIni / 1.001) * intermediatePower - 1) / intermediatePower
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qtyB, price);
-                    log.green("<", symbol, "> Order B:", orderB)
+                    log("Order B response :", orderB)
 
                     totalDailyWeight++;
                     totalDailyOrderWeight++;
@@ -496,10 +498,10 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
 
 
                         price = tickerSourceIntermediate.askPrice;
-                        let qtyC = Math.round(qtyIni * tickerSource.askPrice * sourceIntermediatePower + 1) / sourceIntermediatePower
+                        let qtyC = Math.round(qtyIni * tickerSource.askPrice * sourceIntermediatePower - 1) / sourceIntermediatePower
 
                         let orderC = await tradeIO.newOrder(source + "_" + intermediate, "sell", "limit", qtyC, price);
-                        log.green("<", symbol, "> Order C:", orderC)
+                        log("Order C response :", orderC)
 
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
