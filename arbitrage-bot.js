@@ -21,24 +21,24 @@ var valBtcEth = null;
 var valETH = null;
 
 var start = async function (infos) {
-    var endDayDate = moment().add(1,"day")
+    var endDayDate = moment().add(1, "day")
     log("Starting Arbitrage")
     log(totalDailyOrderWeight, process.env.OrderDailyLimit)
     while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3) && moment().isBefore(endDayDate)) {
-        var endHourDate =  moment().add(1,"hour");
+        var endHourDate = moment().add(1, "hour");
 
         log("Daily Weights :")
         log("Daily Weight :", totalDailyWeight)
         log("Daily Order Weight :", totalDailyOrderWeight)
-        while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3)&& moment().isBefore(endHourDate)) {
-            var endMinuteDate = moment().add(1,"minute")
-            
+        while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3) && moment().isBefore(endHourDate)) {
+            var endMinuteDate = moment().add(1, "minute")
+
             log("Hourly Weights :")
             log("Hourly Weight :", totalHourlyWeight)
             log("Hourly Order Weight :", totalHourlyOrderWeight)
             while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && moment().isBefore(endMinuteDate)) {
-                await launchArbitrage(infos)
-                if(process.env.Timeout != 0)
+                await initArbitrage(infos)
+                if (process.env.Timeout != 0)
                     sleep.msleep(process.env.Timeout);
                 log("Arbitrages finished")
                 log("Minute Weights :")
@@ -85,7 +85,7 @@ var start = async function (infos) {
 
 
 
-var launchArbitrage = async function (infos) {
+var initArbitrage = async function (infos) {
     log("Launching arbitrages")
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
@@ -102,19 +102,16 @@ var launchArbitrage = async function (infos) {
     valETH = formattedTickers.get('eth_usdt').askPrice;
 
     let symbols = formattedTickers.get("symbols")
-    symbols.forEach(ticker => {
+
+    for (const ticker of symbols) {
         //manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
         //manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker,"btc")
-        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
+        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
 
         //manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
-
-
-    });
-
-
-
+    }
 }
+
 
 /////////////////////////////////////////////
 ///////// BTC TO XXX TO ETH TO BTC //////////
@@ -125,16 +122,16 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
     let tickerETH = tickers.get(symbol + "_eth")
     let tickerEthBtc = tickers.get("eth_btc")
 
-    let btcPower = Math.pow(10, infos.get(symbol + "_btc").baseAssetPrecision)
-    let ethPower = Math.pow(10, infos.get(symbol + "_eth").baseAssetPrecision)
-    let ethBtcPower = Math.pow(10, infos.get("eth_btc").baseAssetPrecision)
-
     if (tickerETH &&
         tickerBTC &&
         process.env.Exclusions.indexOf(symbol) == -1 &&
         tickerBTC.askPrice > 0 &&
         tickerETH.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
+        let btcPower = Math.pow(10, infos.get(symbol + "_btc").baseAssetPrecision)
+        let ethPower = Math.pow(10, infos.get(symbol + "_eth").baseAssetPrecision)
+        let ethBtcPower = Math.pow(10, infos.get("eth_btc").baseAssetPrecision)
+
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice
         log(symbol + " bonus -> " + bonus)
 
@@ -145,8 +142,8 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                 let price = tickerBTC.askPrice
                 let qty = Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty)
-                qty = Math.round(qty * btcPower - 1) /btcPower
-                var qtyIni = Math.round(Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty) * ethPower +1) / ethPower;
+                qty = Math.round(qty * btcPower - 1) / btcPower
+                var qtyIni = Math.round(Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty) * ethPower + 1) / ethPower;
                 log.green("Initiating order for symbol " + symbol)
 
                 let orderA = await tradeIO.newOrder(symbol + "_btc", "buy", "limit", qty, price);
@@ -164,7 +161,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                     log.green("First trade successful for arbitrage <BTC TO " + symbol + " TO ETH TO BTC>")
 
                     let price = tickerETH.bidPrice
-                    qty = Math.round(qtyIni / 1.001 * ethPower -1)/ethPower
+                    qty = Math.round(qtyIni / 1.001 * ethPower - 1) / ethPower
                     let orderB = await tradeIO.newOrder(symbol + "_eth", "sell", "limit", qty, price);
 
                     if (orderB.order.status == "Completed") {
@@ -178,9 +175,9 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
-                                                                        
+
                         price = tickerEthBtc.bidPrice;
-                        qty = Math.round(qtyIni * tickerETH.bidPrice * ethBtcPower + 1) /ethBtcPower
+                        qty = Math.round(qtyIni * tickerETH.bidPrice * ethBtcPower + 1) / ethBtcPower
 
                         let orderC = await tradeIO.newOrder("eth_btc", "sell", "limit", qty, price);
 
@@ -244,9 +241,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
     let tickerUSDT = tickers.get(symbol + "_usdt")
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate)
     let tickerIntermediateUSDT = tickers.get(intermediate + "_usdt")
-    let usdtPower = Math.pow(10, infos.get(symbol + "_usdt").baseAssetPrecision)
-    let intermediatePower = Math.pow(10, infos.get(symbol + "_"+intermediate).baseAssetPrecision)
-    let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").baseAssetPrecision)
+
 
     if (tickerUSDT &&
         tickerIntermediate &&
@@ -254,6 +249,9 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
         tickerUSDT.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
+        let usdtPower = Math.pow(10, infos.get(symbol + "_usdt").baseAssetPrecision)
+        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
+        let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").baseAssetPrecision)
 
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice
         log(symbol + " bonus -> " + bonus)
@@ -278,8 +276,8 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 
                 let price = tickerUSDT.askPrice
                 let qty = Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty)
-                qty = Math.round(qty*usdtPower -1)/usdtPower
-                var qtyIni = Math.round(Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty) * intermediatePower +1) /intermediatePower;
+                qty = Math.round(qty * usdtPower - 1) / usdtPower
+                var qtyIni = Math.round(Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty) * intermediatePower + 1) / intermediatePower;
 
                 log("Initiating order for symbol " + symbol)
 
@@ -296,9 +294,9 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 
                 if (orderA.order.status == "Completed") {
                     log.green("First trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
-                                                                        
+
                     let price = tickerIntermediate.bidPrice
-                    let qty = Math.round(qtyIni / 1.001 * intermediatePower -1) / intermediatePower
+                    let qty = Math.round(qtyIni / 1.001 * intermediatePower - 1) / intermediatePower
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
 
@@ -312,18 +310,18 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     totalHourlyOrderWeight++;
 
                     if (orderB.order.status == "Completed") {
-                        log.green("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")                                                          
+                        log.green("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
                         price = tickerIntermediateUSDT.bidPrice;
-                        qty = Math.round(qtyIni * tickerIntermediate.bidPrice * intermediateUSDTPower +1)/intermediateUSDTPower
+                        qty = Math.round(qtyIni * tickerIntermediate.bidPrice * intermediateUSDTPower + 1) / intermediateUSDTPower
 
                         let orderC = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
 
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
-    
+
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
-    
+
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
 
@@ -377,81 +375,98 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos, symbol, source, intermediate) {
     //log("Checking arbitrage : <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
 
-        let tickerSource = tickers.get(symbol + "_" + source)
-        let tickerIntermediate = tickers.get(symbol + "_" + intermediate)
-        let tickerSourceIntermediate = tickers.get(source + "_" + intermediate)
-        var sourcePower = Math.pow(10,infos.get(symbol + "_" + source).baseAssetPrecision)
+    let tickerSource = tickers.get(symbol + "_" + source)
+    let tickerIntermediate = tickers.get(symbol + "_" + intermediate)
+    let tickerSourceIntermediate = tickers.get(source + "_" + intermediate)
+    
+    if (tickerSource &&
+        tickerIntermediate &&
+        process.env.Exclusions.indexOf(symbol) == -1 &&
+        tickerSource.askPrice > 0 &&
+        tickerIntermediate.bidPrice > 0) {
+        //log("Tickers exists for " + symbol)
+        let sourcePower = Math.pow(10, infos.get(symbol + "_" + source).baseAssetPrecision)
         let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
         let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).baseAssetPrecision)
 
+        let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
+        log("<" + source + "->" + symbol + "->" + intermediate + "->" + source + ">", "| " + symbol + " bonus = " + bonus)
 
-        if (tickerSource &&
-            tickerIntermediate &&
-            process.env.Exclusions.indexOf(symbol) == -1 &&
-            tickerSource.askPrice > 0 &&
-            tickerIntermediate.bidPrice > 0) {
-            //log("Tickers exists for " + symbol)
+        if (bonus > process.env.MinProfit) {
+            log.green("Found positive trade")
 
-            let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
-            log("<" + source + "->" + symbol + "->" + intermediate + "->" + source + ">","| "+ symbol+ " bonus = " + bonus)
+            var minIntermediate;
+            var maxIntermediate;
+            if (intermediate == "eth") {
+                minIntermediate = process.env.MinETH
+                maxIntermediate = process.env.MaxETH
+            } else if (intermediate == "btc") {
+                minIntermediate = process.env.MinBTC
+                maxIntermediate = process.env.MaxBTC
+            } else {
+                minIntermediate = process.env.MinUSDT
+                maxIntermediate = process.env.MaxUSDT
+            }
 
-            if (bonus > process.env.MinProfit) {
-                log.green("Found positive trade")
+            var minSource;
+            var maxSource;
+            if (source == "eth") {
+                minSource = process.env.MinETH
+                maxSource = process.env.MaxETH
+            } else if (source == "btc") {
+                minSource = process.env.MinBTC
+                maxSource = process.env.MaxBTC
+            } else {
+                minSource = process.env.MinUSDT
+                maxSource = process.env.MaxUSDT
+            }
 
-                var minIntermediate;
-                var maxIntermediate;
-                if (intermediate == "eth") {
-                    minIntermediate = process.env.MinETH
-                    maxIntermediate = process.env.MaxETH
-                } else if (intermediate == "btc") {
-                    minIntermediate = process.env.MinBTC
-                    maxIntermediate = process.env.MaxBTC
-                } else {
-                    minIntermediate = process.env.MinUSDT
-                    maxIntermediate = process.env.MaxUSDT
-                }
+            var valIntermediate;
+            if (intermediate == "eth")
+                valIntermediate = valETH
+            else if (intermediate == "btc")
+                valIntermediate = valBTC
+            else
+                valIntermediate = valBtcEth
 
-                var minSource;
-                var maxSource;
-                if (source == "eth") {
-                    minSource = process.env.MinETH
-                    maxSource = process.env.MaxETH
-                } else if (source == "btc") {
-                    minSource = process.env.MinBTC
-                    maxSource = process.env.MaxBTC
-                } else {
-                    minSource = process.env.MinUSDT
-                    maxSource = process.env.MaxUSDT
-                }
-
-                var valIntermediate;
-                if (intermediate == "eth")
-                    valIntermediate = valETH
-                else if (intermediate == "btc")
-                    valIntermediate = valBTC
-                else
-                    valIntermediate = valBtcEth
-
-                var valSource;
-                if (source == "eth")
-                    valSource = valETH
-                else if (source == "btc")
-                    valSource = valBTC
-                else
-                    valSource = valBtcEth
+            var valSource;
+            if (source == "eth")
+                valSource = valETH
+            else if (source == "btc")
+                valSource = valBTC
+            else
+                valSource = valBtcEth
 
 
-                if (tickerIntermediate.bidPrice * tickerIntermediate.bidQty > minIntermediate && tickerSource.askQty * tickerSource.askPrice > minSource && tickerSource.askPrice * tickerSource.askQty * valSource > minIntermediate) {
-                    log.green("Quantity is enough for trade for symbol " + symbol)
-                    let price = tickerSource.askPrice
-                    let qty = Math.min(Math.round(maxSource / price *sourcePower +1)/sourcePower, tickerIntermediate.bidQty, tickerSource.askQty)
-                    qty = Math.round(qty * sourcePower -1) / sourcePower
-                    var qtyIni = Math.round(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty) * intermediatePower + 1) / intermediatePower;
+            if (tickerIntermediate.bidPrice * tickerIntermediate.bidQty > minIntermediate && tickerSource.askQty * tickerSource.askPrice > minSource && tickerSource.askPrice * tickerSource.askQty * valSource > minIntermediate) {
+                log.green("Quantity is enough for trade for symbol " + symbol)
+                let price = tickerSource.askPrice
+                let qty = Math.min(Math.round(maxSource / price * sourcePower + 1) / sourcePower, tickerIntermediate.bidQty, tickerSource.askQty)
+                qty = Math.round(qty * sourcePower - 1) / sourcePower
+                var qtyIni = Math.round(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty) * intermediatePower + 1) / intermediatePower;
 
-                    log.green("Initiating order for symbol " + symbol)
+                log.green("Initiating order for symbol " + symbol)
 
-                    let orderA = await tradeIO.newOrder(symbol + "_"+source, "buy", "limit", qty, price);
-                    log.green("<",symbol,"> Order A:", orderA)
+                let orderA = await tradeIO.newOrder(symbol + "_" + source, "buy", "limit", qty, price);
+                log.green("<", symbol, "> Order A:", orderA)
+                totalDailyWeight++;
+                totalDailyOrderWeight++;
+
+                totalMinuteWeight++;
+                totalMinuteOrderWeight++;
+
+                totalHourlyWeight++;
+                totalHourlyOrderWeight++;
+
+                if (orderA.code === 0 && orderA.order.status == "Completed") {
+                    log.green("First trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+
+                    let price = tickerIntermediate.bidPrice
+                    let qtyB = Math.round((qtyIni / 1.001) * intermediatePower - 1) / intermediatePower
+
+                    let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qtyB, price);
+                    log.green("<", symbol, "> Order B:", orderB)
+
                     totalDailyWeight++;
                     totalDailyOrderWeight++;
 
@@ -461,14 +476,18 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     totalHourlyWeight++;
                     totalHourlyOrderWeight++;
 
-                    if (orderA.code === 0 && orderA.order.status == "Completed") {
-                        log.green("First trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
-                        
-                        let price = tickerIntermediate.bidPrice
-                        let qtyB = Math.round((qtyIni / 1.001) * intermediatePower -1) /intermediatePower
+                    if (orderB.code === 0 && orderB.order.status == "Completed") {
+                        log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
 
-                        let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qtyB, price);
-                        log.green("<",symbol,"> Order B:", orderB)
+                        $price = $ticker_list['eth_usdt']['askPrice'];
+                        $quantity = round(($quantity_ini) * $ticker_list[$ticketh]['askPrice'], $pairs_infos["eth_usdt"]['baseAssetPrecision'], PHP_ROUND_HALF_UP);
+
+
+                        price = tickerSourceIntermediate.askPrice;
+                        let qtyC = Math.round(qtyIni * tickerSource.askPrice * sourceIntermediatePower + 1) / sourceIntermediatePower
+
+                        let orderC = await tradeIO.newOrder(source + "_" + intermediate, "sell", "limit", qtyC, price);
+                        log.green("<", symbol, "> Order C:", orderC)
 
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
@@ -479,61 +498,39 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
 
-                        if (orderB.code === 0 && orderB.order.status == "Completed") {
-                            log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
-
-                            $price = $ticker_list['eth_usdt']['askPrice'];
-                            $quantity = round(($quantity_ini) * $ticker_list[$ticketh]['askPrice'], $pairs_infos["eth_usdt"]['baseAssetPrecision'], PHP_ROUND_HALF_UP);
-                            
-
-                            price = tickerSourceIntermediate.askPrice;
-                            let qtyC = Math.round(qtyIni * tickerSource.askPrice * sourceIntermediatePower +1) / sourceIntermediatePower
-
-                            let orderC = await tradeIO.newOrder(source + "_" + intermediate, "sell", "limit", qtyC, price);
-                            log.green("<",symbol,"> Order C:", orderC)
-
-                            totalDailyWeight++;
-                            totalDailyOrderWeight++;
-
-                            totalMinuteWeight++;
-                            totalMinuteOrderWeight++;
-
-                            totalHourlyWeight++;
-                            totalHourlyOrderWeight++;
-
-                            if (orderC.code === 0 && orderC.order.status == "Completed") {
-                                log.green("Third trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
-                            } else {
-                                log.warn("Third trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
-                                // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
-                                //     if (resp.order.status == "Canceled") {
-                                //         log.warn("Third trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
-                                //     }
-                                // })
-                            }
-
+                        if (orderC.code === 0 && orderC.order.status == "Completed") {
+                            log.green("Third trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
                         } else {
-                            log.warn("Second trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                            log.warn("Third trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
                             // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
                             //     if (resp.order.status == "Canceled") {
-                            //         log.warn("Second trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                            //         log.warn("Third trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
                             //     }
                             // })
                         }
+
                     } else {
-                        log.warn("First trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
+                        log.warn("Second trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
                         // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
-                        //     resolve()
-                        //     //manageArbitrageETH_BTC(tickers, infos, symbol)
+                        //     if (resp.order.status == "Canceled") {
+                        //         log.warn("Second trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
+                        //     }
                         // })
                     }
                 } else {
-                    log.warn("Not enough quantity for trade for symbol " + symbol)
+                    log.warn("First trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">, canceling order")
+                    // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
+                    //     resolve()
+                    //     //manageArbitrageETH_BTC(tickers, infos, symbol)
+                    // })
                 }
-
+            } else {
+                log.warn("Not enough quantity for trade for symbol " + symbol)
             }
-        } else {
-            //log.warn("Ticker doesn't exist for symbol", symbol)
+
         }
+    } else {
+        //log.warn("Ticker doesn't exist for symbol", symbol)
+    }
 }
 exports.start = start;
