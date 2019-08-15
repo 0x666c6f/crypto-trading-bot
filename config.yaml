@@ -17,7 +17,7 @@ config:
   APIDailyLimit : 1400000
   Timeout: 1000
   Simulation: true
-  Fees: 0.001
+  Fees: 1.001
   LogLevel: INFO
   Exclusions:
     - ktos
