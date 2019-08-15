@@ -86,7 +86,11 @@ var start = async function (infos) {
 
 
 var initArbitrage = async function (infos) {
+
+    log("====================")
     log("Launching arbitrages")
+    log("====================")
+
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers)
@@ -104,11 +108,12 @@ var initArbitrage = async function (infos) {
     let symbols = formattedTickers.get("symbols")
 
     for (const ticker of symbols) {
-        //manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
-        //manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker,"btc")
+        log(">>> Checking arbitrages for symbol", "<"+ticker.toUpperCase()+">")
+        await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
+        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker,"btc")
+        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker,"eth")
         await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
-
-        //manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
+        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
     }
 }
 
@@ -117,7 +122,6 @@ var initArbitrage = async function (infos) {
 ///////// BTC TO XXX TO ETH TO BTC //////////
 ////////////////////////////////////////////
 var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
-    //log("Checking arbitrage : <BTC TO " + symbol + " TO ETH TO BTC>")
     let tickerBTC = tickers.get(symbol + "_btc")
     let tickerETH = tickers.get(symbol + "_eth")
     let tickerEthBtc = tickers.get("eth_btc")
@@ -133,7 +137,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
         let ethBtcPower = Math.pow(10, infos.get("eth_btc").baseAssetPrecision)
 
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice
-        log(symbol + " bonus -> " + bonus)
+        log("\t<BTC->" + symbol.toUpperCase() + "->ETH->BTC>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -254,7 +258,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
         let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").baseAssetPrecision)
 
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice
-        log(symbol + " bonus -> " + bonus)
+        log("\t<USDT->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->USDT>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -390,7 +394,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
         let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).baseAssetPrecision)
 
         let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
-        log("<" + source + "->" + symbol + "->" + intermediate + "->" + source + ">", "| " + symbol + " bonus = " + bonus)
+        log("\t<" + source.toUpperCase() + "->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->" + source.toUpperCase() + ">", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -437,8 +441,16 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
             else
                 valSource = valBtcEth
 
+            var valSourceIntermediate;
+            if (source == "eth" && intermediate == "usdt")
+                valSourceIntermediate = valETH
+            else if (source == "btc" && intermediate == "usdt")
+                valSourceIntermediate = valBTC
+            else
+                valSourceIntermediate = valBtcEth  
 
-            if (tickerIntermediate.bidPrice * tickerIntermediate.bidQty > minIntermediate && tickerSource.askQty * tickerSource.askPrice > minSource && tickerSource.askPrice * tickerSource.askQty * valSource > minIntermediate) {
+
+            if (tickerIntermediate.bidPrice * tickerIntermediate.bidQty > minIntermediate && tickerSource.askQty * tickerSource.askPrice > minSource && tickerSource.askPrice * tickerSource.askQty * valSourceIntermediate > minIntermediate) {
                 log.green("Quantity is enough for trade for symbol " + symbol)
                 let price = tickerSource.askPrice
                 let qty = Math.min(Math.round(maxSource / price * sourcePower + 1) / sourcePower, tickerIntermediate.bidQty, tickerSource.askQty)
