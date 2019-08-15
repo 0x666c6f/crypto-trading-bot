@@ -126,17 +126,18 @@ var newOrder = function(symbol, side, type, quantity, price, stopPrice) {
             "Side": side,
             "Type": type,
             "Quantity": quantity,
-            "ts": ""+ts
+            "ts": ""+ts,
         }
-        log("\t Order :", JSON.stringify(order, null, 2))
 
         if(price)
             order.Price = price
         if (stopPrice)
             order.StopPrice = stopPrice
 
+        log("\t Order :", JSON.stringify(order, null, 2))
+
         http.post(process.env.APIEndpoint+"/api/v1/order", order).then(function(resp) {
-            log("New Order successfull")
+            log("New Order request successfull")
             resolve(resp)
         }, function(error){
             log.red("Error while doing New order request = "+ JSON.stringify(error, null, 2))
