@@ -43,3 +43,5 @@ config:
     - sidt
     - aoa
     - solve
+    - wpp
+    - loom
