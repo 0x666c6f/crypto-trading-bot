@@ -1,9 +1,6 @@
 var tradeIO = require('./tradeio')
 var tradingUtils = require('./trading-utils')
-const log = require('ololog').configure({
-    time: true
-})
-const ansi = require('ansicolor').nice
+const log = require('./logger').logger
 var sleep = require('sleep');
 const moment = require("moment")
 
@@ -107,10 +104,10 @@ var initArbitrage = async function (infos) {
 
     let symbols = formattedTickers.get("symbols")
     for (const ticker of symbols) {
-        log(">>> Checking arbitrages for symbol", "<"+ticker.toUpperCase()+">")
+        log(">>> Checking arbitrages for symbol", "<" + ticker.toUpperCase() + ">")
         await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
-        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker,"btc")
-        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker,"eth")
+        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc")
+        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth")
         await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
         await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
     }
@@ -317,7 +314,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     if (orderB.code === 0 && orderB.order.status == "Completed") {
                         log.green("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
                         price = tickerIntermediateUSDT.bidPrice;
-                        qty = Math.round(qtyIni /process.env.Fees * tickerIntermediate.bidPrice * intermediateUSDTPower - 1) / intermediateUSDTPower
+                        qty = Math.round(qtyIni / process.env.Fees * tickerIntermediate.bidPrice * intermediateUSDTPower - 1) / intermediateUSDTPower
 
                         let orderC = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
                         log("Order C response :", orderC)
@@ -384,7 +381,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
     let tickerSource = tickers.get(symbol + "_" + source)
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate)
     let tickerSourceIntermediate = tickers.get(source + "_" + intermediate)
-    
+
     if (tickerSource &&
         tickerIntermediate &&
         tickerSource.askPrice > 0 &&
@@ -448,7 +445,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
             else if (source == "btc" && intermediate == "usdt")
                 valSourceIntermediate = valBTC
             else
-                valSourceIntermediate = valBtcEth  
+                valSourceIntermediate = valBtcEth
 
 
             if (tickerIntermediate.bidPrice * tickerIntermediate.bidQty > minIntermediate && tickerSource.askQty * tickerSource.askPrice > minSource && tickerSource.askPrice * tickerSource.askQty * valSourceIntermediate > minIntermediate) {

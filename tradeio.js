@@ -1,7 +1,5 @@
-const log = require('ololog').configure({
-    time: true
-})
-const ansi = require('ansicolor').nice
+const log = require('./logger').logger
+
 var http = require('./http-manager');
 
 var about = function() {
