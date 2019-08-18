@@ -127,9 +127,9 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
         tickerBTC.askPrice > 0 &&
         tickerETH.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
-        let btcPower = Math.pow(10, infos.get(symbol + "_btc").quoteAssetPrecision)
-        let ethPower = Math.pow(10, infos.get(symbol + "_eth").quoteAssetPrecision)
-        let ethBtcPower = Math.pow(10, infos.get("eth_btc").quoteAssetPrecision)
+        let btcPower = Math.pow(10, infos.get(symbol + "_btc").baseAssetPrecision -1)
+        let ethPower = Math.pow(10, infos.get(symbol + "_eth").baseAssetPrecision -1)
+        let ethBtcPower = Math.pow(10, infos.get("eth_btc").baseAssetPrecision -1)
 
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice
 
@@ -250,9 +250,9 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
         tickerUSDT.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
-        let usdtPower = Math.pow(10, infos.get(symbol + "_usdt").quoteAssetPrecision)
-        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).quoteAssetPrecision)
-        let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").quoteAssetPrecision)
+        let usdtPower = Math.pow(10, infos.get(symbol + "_usdt").baseAssetPrecision -1)
+        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision -1)
+        let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").baseAssetPrecision -1)
 
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice
 
@@ -388,9 +388,9 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
         tickerSource.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
-        let sourcePower = Math.pow(10, infos.get(symbol + "_" + source).quoteAssetPrecision)
-        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).quoteAssetPrecision)
-        let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).quoteAssetPrecision)
+        let sourcePower = Math.pow(10, infos.get(symbol + "_" + source).baseAssetPrecision -1)
+        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision -1)
+        let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).baseAssetPrecision -1)
 
         let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
 
