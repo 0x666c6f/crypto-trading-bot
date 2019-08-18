@@ -132,11 +132,11 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
         let ethBtcPower = Math.pow(10, infos.get("eth_btc").quoteAssetPrecision)
 
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice
-        //log("\t<BTC->" + symbol.toUpperCase() + "->ETH->BTC>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
             if (tickerBTC.askPrice * tickerBTC.askQty > process.env.MinBTC && tickerETH.bidQty * tickerETH.bidPrice > process.env.MinETH && tickerETH.bidPrice * tickerETH.bidQty * valBtcEth > process.env.MinBTC) {
+                log("\t<BTC->" + symbol.toUpperCase() + "->ETH->BTC>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
                 log.green("Quantity is enough for trade for symbol " + symbol)
 
                 let price = tickerBTC.askPrice
@@ -255,7 +255,6 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
         let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").quoteAssetPrecision)
 
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice
-        //log("\t<USDT->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->USDT>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -273,6 +272,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                 valIntermediate = valBTC
 
             if (tickerUSDT.askPrice * tickerUSDT.askQty > process.env.MinUSDT && tickerIntermediate.bidQty * tickerIntermediate.bidPrice > minIntermediate && tickerIntermediate.bidPrice * tickerIntermediate.bidQty * valIntermediate > process.env.MinUSDT) {
+                log("\t<USDT->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->USDT>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
                 log.green("Quantity is enough for trade for symbol " + symbol)
 
                 let price = tickerUSDT.askPrice
@@ -393,7 +393,6 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
         let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).quoteAssetPrecision)
 
         let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
-        //log("\t<" + source.toUpperCase() + "->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->" + source.toUpperCase() + ">", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -450,6 +449,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
 
 
             if (tickerIntermediate.bidPrice * tickerIntermediate.bidQty > minIntermediate && tickerSource.askQty * tickerSource.askPrice > minSource && tickerSource.askPrice * tickerSource.askQty * valSourceIntermediate > minIntermediate) {
+                log("\t<" + source.toUpperCase() + "->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->" + source.toUpperCase() + ">", "| " + symbol.toUpperCase() + " bonus = " + bonus)    
                 log.green("Quantity is enough for trade for symbol " + symbol)
                 let price = tickerSource.askPrice
                 let qty = Math.min(Math.round(maxSource / price * sourcePower - 1) / sourcePower, tickerIntermediate.bidQty, tickerSource.askQty)
