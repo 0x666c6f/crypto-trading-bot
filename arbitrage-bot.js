@@ -127,9 +127,9 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
         tickerBTC.askPrice > 0 &&
         tickerETH.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
-        let btcPower = Math.pow(10, infos.get(symbol + "_btc").baseAssetPrecision)
-        let ethPower = Math.pow(10, infos.get(symbol + "_eth").baseAssetPrecision)
-        let ethBtcPower = Math.pow(10, infos.get("eth_btc").baseAssetPrecision)
+        let btcPower = Math.pow(10, infos.get(symbol + "_btc").quoteAssetPrecision)
+        let ethPower = Math.pow(10, infos.get(symbol + "_eth").quoteAssetPrecision)
+        let ethBtcPower = Math.pow(10, infos.get("eth_btc").quoteAssetPrecision)
 
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice
         log("\t<BTC->" + symbol.toUpperCase() + "->ETH->BTC>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
@@ -250,9 +250,9 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
         tickerUSDT.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
-        let usdtPower = Math.pow(10, infos.get(symbol + "_usdt").baseAssetPrecision)
-        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
-        let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").baseAssetPrecision)
+        let usdtPower = Math.pow(10, infos.get(symbol + "_usdt").quoteAssetPrecision)
+        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).quoteAssetPrecision)
+        let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").quoteAssetPrecision)
 
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice
         log("\t<USDT->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->USDT>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
@@ -388,9 +388,9 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
         tickerSource.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
-        let sourcePower = Math.pow(10, infos.get(symbol + "_" + source).baseAssetPrecision)
-        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).baseAssetPrecision)
-        let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).baseAssetPrecision)
+        let sourcePower = Math.pow(10, infos.get(symbol + "_" + source).quoteAssetPrecision)
+        let intermediatePower = Math.pow(10, infos.get(symbol + "_" + intermediate).quoteAssetPrecision)
+        let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).quoteAssetPrecision)
 
         let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
         log("\t<" + source.toUpperCase() + "->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->" + source.toUpperCase() + ">", "| " + symbol.toUpperCase() + " bonus = " + bonus)
@@ -490,10 +490,6 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
 
                     if (orderB.code === 0 && orderB.order.status == "Completed") {
                         log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
-
-                        $price = $ticker_list['eth_usdt']['askPrice'];
-                        $quantity = round(($quantity_ini) / process.env.Fees * $ticker_list[$ticketh]['askPrice'], $pairs_infos["eth_usdt"]['baseAssetPrecision'], PHP_ROUND_HALF_UP);
-
 
                         price = tickerSourceIntermediate.askPrice;
                         let qtyC = Math.round(qtyIni * tickerSource.askPrice * sourceIntermediatePower - 1) / sourceIntermediatePower
