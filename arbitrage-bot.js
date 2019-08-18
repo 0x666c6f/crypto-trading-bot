@@ -132,7 +132,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
         let ethBtcPower = Math.pow(10, infos.get("eth_btc").quoteAssetPrecision)
 
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice
-        log("\t<BTC->" + symbol.toUpperCase() + "->ETH->BTC>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
+        //log("\t<BTC->" + symbol.toUpperCase() + "->ETH->BTC>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -255,7 +255,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
         let intermediateUSDTPower = Math.pow(10, infos.get(intermediate + "_usdt").quoteAssetPrecision)
 
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice
-        log("\t<USDT->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->USDT>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
+        //log("\t<USDT->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->USDT>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -340,7 +340,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                             // })
                         }
                     } else {
-                        log.warn("Second trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT> :", orderB)
+                        log.error("Second trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT> :", orderB)
                         // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
                         //     if (resp.order.status == "Canceled") {
                         //         log.warn("Second trade successful canceled for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT>")
@@ -348,7 +348,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         // })
                     }
                 } else {
-                    log.warn("First trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT> :", orderA)
+                    log.error("First trade has failed for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT> :", orderA)
                     // totalDailyWeight++;
                     // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
                     //     if (resp.order.status == "Canceled") {
@@ -393,7 +393,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
         let sourceIntermediatePower = Math.pow(10, infos.get(source + "_" + intermediate).quoteAssetPrecision)
 
         let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
-        log("\t<" + source.toUpperCase() + "->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->" + source.toUpperCase() + ">", "| " + symbol.toUpperCase() + " bonus = " + bonus)
+        //log("\t<" + source.toUpperCase() + "->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->" + source.toUpperCase() + ">", "| " + symbol.toUpperCase() + " bonus = " + bonus)
 
         if (bonus > process.env.MinProfit) {
             log.green("Found positive trade")
@@ -509,7 +509,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         if (orderC.code === 0 && orderC.order.status == "Completed") {
                             log.green("Third trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
                         } else {
-                            log.warn("Third trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderC)
+                            log.error("Third trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderC)
                             // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
                             //     if (resp.order.status == "Canceled") {
                             //         log.warn("Third trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
@@ -518,7 +518,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         }
 
                     } else {
-                        log.warn("Second trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderB)
+                        log.error("Second trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderB)
                         // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
                         //     if (resp.order.status == "Canceled") {
                         //         log.warn("Second trade successful canceled for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + ">")
@@ -526,7 +526,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         // })
                     }
                 } else {
-                    log.warn("First trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderA)
+                    log.error("First trade has failed for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderA)
                     // tradeIO.cancelOrder(resp.order.orderId).then(function (resp) {
                     //     resolve()
                     //     //manageArbitrageETH_BTC(tickers, infos, symbol)
