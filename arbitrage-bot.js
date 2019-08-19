@@ -25,23 +25,23 @@ var start = async function (infos) {
     while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3) && moment().isBefore(endDayDate)) {
         var endHourDate = moment().add(1, "hour");
 
-        log("Daily Weights :")
-        log("Daily Weight :", totalDailyWeight)
-        log("Daily Order Weight :", totalDailyOrderWeight)
+        // log("Daily Weights :")
+        // log("Daily Weight :", totalDailyWeight)
+        // log("Daily Order Weight :", totalDailyOrderWeight)
         while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3) && moment().isBefore(endHourDate)) {
             var endMinuteDate = moment().add(1, "minute")
 
-            log("Hourly Weights :")
-            log("Hourly Weight :", totalHourlyWeight)
-            log("Hourly Order Weight :", totalHourlyOrderWeight)
+            // log("Hourly Weights :")
+            // log("Hourly Weight :", totalHourlyWeight)
+            // log("Hourly Order Weight :", totalHourlyOrderWeight)
             while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && moment().isBefore(endMinuteDate)) {
                 await initArbitrage(infos)
                 if (process.env.Timeout != 0)
                     sleep.msleep(process.env.Timeout);
                 log("Arbitrages finished")
-                log("Minute Weights :")
-                log("Minute Weight :", totalMinuteWeight)
-                log("Minute Order Weight :", totalMinuteOrderWeight)
+                // log("Minute Weights :")
+                // log("Minute Weight :", totalMinuteWeight)
+                // log("Minute Order Weight :", totalMinuteOrderWeight)
             }
             totalMinuteWeight = 0;
             totalMinuteOrderWeight = 0;
@@ -105,7 +105,7 @@ var initArbitrage = async function (infos) {
 
     let symbols = formattedTickers.get("symbols")
     for (const ticker of symbols) {
-        log(">>> Checking arbitrages for symbol", "<" + ticker.toUpperCase() + ">")
+        //log(">>> Checking arbitrages for symbol", "<" + ticker.toUpperCase() + ">")
         await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)
         await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc")
         await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth")
@@ -131,7 +131,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice
 
         if (bonus > process.env.MinProfit) {
-            log.green("Found positive trade")
+            log.green("Found positive trade for symbol ", symbol.toUpperCase())
             if (tickerBTC.askPrice * tickerBTC.askQty > process.env.MinBTC && tickerETH.bidQty * tickerETH.bidPrice > process.env.MinETH && tickerETH.bidPrice * tickerETH.bidQty * valBtcEth > process.env.MinBTC) {
                 log("\t<BTC->" + symbol.toUpperCase() + "->ETH->BTC>", "| " + symbol.toUpperCase() + " bonus = " + bonus)
                 log.green("Quantity is enough for trade for symbol " + symbol)
@@ -225,7 +225,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                     // })
                 }
             } else {
-                log.warn("Not enough quantity for trade for symbol " + symbol)
+                log("Not enough quantity for trade for symbol " + symbol)
 
             }
 
@@ -257,7 +257,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice
 
         if (bonus > process.env.MinProfit) {
-            log.green("Found positive trade")
+            log.green("Found positive trade for symbol ", symbol.toUpperCase())
 
             var minIntermediate;
             if (intermediate == "eth")
@@ -367,7 +367,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     // })
                 }
             } else {
-                log.warn("Not enough quantity for trade for symbol " + symbol)
+                log("Not enough quantity for trade for symbol " + symbol)
 
             }
 
@@ -402,7 +402,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
         let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice
 
         if (bonus > process.env.MinProfit) {
-            log.green("Found positive trade")
+            log.green("Found positive trade for symbol ", symbol.toUpperCase())
 
             var minIntermediate;
             var maxIntermediate;
@@ -529,7 +529,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     // })
                 }
             } else {
-                log.warn("Not enough quantity for trade for symbol " + symbol)
+                log("Not enough quantity for trade for symbol " + symbol)
             }
 
         }
