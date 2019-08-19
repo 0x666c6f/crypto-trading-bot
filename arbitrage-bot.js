@@ -139,10 +139,8 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                 let price = tickerBTC.askPrice
                 
                 BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_btc").baseAssetPrecision })   
-
                 let qty = Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty)
                 qty = new BigNumber(qty).toNumber()
-
                 BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_eth").baseAssetPrecision })   
                 var qtyIni = new BigNumber(qty).toNumber();
 
@@ -445,10 +443,11 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                 log("\t<" + source.toUpperCase() + "->" + symbol.toUpperCase() + "->" + intermediate.toUpperCase() + "->" + source.toUpperCase() + ">", "| " + symbol.toUpperCase() + " bonus = " + bonus)    
                 log.green("Quantity is enough for trade for symbol " + symbol)
                 let price = tickerSource.askPrice
-
+                
                 BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_"+source).baseAssetPrecision })   
+                let qty = new Math.min(new BigNumber(maxSource / price).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty)
 
-                let qty = new BigNumber(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty)).toNumber()
+                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_"+intermediate).baseAssetPrecision })   
                 var qtyIni = new BigNumber(qty).toNumber();
 
                 log.green("Initiating order for symbol " + symbol)
