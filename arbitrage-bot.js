@@ -4,6 +4,7 @@ const log = require('./logger').logger
 var sleep = require('sleep');
 const moment = require("moment")
 const BigNumber = require('bignumber.js');
+BigNumber.config({ ROUNDING_MODE: 1})  
 
 var totalDailyWeight = 0;
 var totalDailyOrderWeight = 0;
@@ -136,12 +137,10 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                 log.green("Quantity is enough for trade for symbol " + symbol)
 
                 let price = tickerBTC.askPrice
-                
-                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_btc").baseAssetPrecision })   
+
                 let qty = Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty)
-                qty = new BigNumber(qty).toNumber()
-                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_eth").baseAssetPrecision })   
-                var qtyIni = new BigNumber(qty).toNumber();
+                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_btc").baseAssetPrecision).toNumber()
+                var qtyIni = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_eth").baseAssetPrecision).toNumber();
 
                 log.green("Initiating order for symbol " + symbol)
 
@@ -160,8 +159,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                     let price = tickerETH.bidPrice
 
-                    BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_eth").baseAssetPrecision })   
-                    qty = new BigNumber((qtyIni / process.env.Fees)).toNumber();
+                    qty = new BigNumber((qtyIni / process.env.Fees)).decimalPlaces(infos.get(symbol + "_eth").baseAssetPrecision).toNumber();
 
                     let orderB = await tradeIO.newOrder(symbol + "_eth", "sell", "limit", qty, price);
 
@@ -179,8 +177,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                         price = tickerEthBtc.bidPrice;
 
-                        BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get("eth_btc").baseAssetPrecision })   
-                        qty = new BigNumber((qtyIni / process.env.Fees) * tickerETH.bidPrice).toNumber();
+                        qty = new BigNumber((qtyIni / process.env.Fees) * tickerETH.bidPrice).decimalPlaces(infos.get("eth_btc").baseAssetPrecision).toNumber();
 
                         let orderC = await tradeIO.newOrder("eth_btc", "sell", "limit", qty, price);
 
@@ -276,13 +273,8 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 
                 let price = tickerUSDT.askPrice
                 let qty = Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty)
-
-                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_usdt").baseAssetPrecision })   
-
-                qty = new BigNumber(qty).toNumber();
-
-                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_" + intermediate).baseAssetPrecision })   
-                var qtyIni = new BigNumber(qty).toNumber();
+                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_usdt").baseAssetPrecision).toNumber();
+                var qtyIni = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
 
                 log("Initiating order for symbol " + symbol)
 
@@ -302,9 +294,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     log.green("First trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT> :", orderA)
 
                     let price = tickerIntermediate.bidPrice
-                    BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_" + intermediate).baseAssetPrecision })   
-
-                    let qty = new BigNumber(qtyIni / process.env.Fees).toNumber()
+                    let qty = new BigNumber(qtyIni / process.env.Fees).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber()
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
                     log("Order B response :", orderB)
@@ -321,10 +311,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     if (orderB.code === 0 && orderB.order.status == "Completed") {
                         log.green("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT> :", orderB)
                         price = tickerIntermediateUSDT.bidPrice;
-
-                        BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(intermediate + "_usdt").baseAssetPrecision })   
-
-                        qty = new BigNumber(qtyIni / process.env.Fees * tickerIntermediate.bidPrice).toNumber()
+                        qty = new BigNumber(qtyIni / process.env.Fees * tickerIntermediate.bidPrice).decimalPlaces(infos.get(intermediate + "_usdt").baseAssetPrecision).toNumber()
 
                         let orderC = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
                         log("Order C response :", orderC)
@@ -443,11 +430,8 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                 log.green("Quantity is enough for trade for symbol " + symbol)
                 let price = tickerSource.askPrice
                 
-                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_"+source).baseAssetPrecision })   
-                let qty = new Math.min(new BigNumber(maxSource / price).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty)
-
-                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_"+intermediate).baseAssetPrecision })   
-                var qtyIni = new BigNumber(qty).toNumber();
+                let qty = new Math.min(new BigNumber(maxSource / price).decimalPlaces(infos.get(symbol + "_"+source).baseAssetPrecision).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty)
+                var qtyIni = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_"+intermediate).baseAssetPrecision).toNumber();
 
                 log.green("Initiating order for symbol " + symbol)
 
@@ -466,9 +450,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     log.green("First trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderA)
 
                     let price = tickerIntermediate.bidPrice
-                    BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_"+intermediate).baseAssetPrecision })   
-
-                    let qtyB = new BigNumber(qtyIni / process.env.Fees).toNumber()
+                    let qtyB = new BigNumber(qtyIni / process.env.Fees).decimalPlaces(infos.get(symbol + "_"+intermediate).baseAssetPrecision).toNumber()
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qtyB, price);
 
@@ -485,10 +467,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderB)
 
                         price = tickerSourceIntermediate.askPrice;
-
-                        BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(source + "_"+intermediate).baseAssetPrecision })   
-
-                        let qtyC = new BigNumber(qtyIni * tickerSource.askPrice).toNumber()
+                        let qtyC = new BigNumber(qtyIni * tickerSource.askPrice).decimalPlaces(infos.get(source + "_"+intermediate).baseAssetPrecision).toNumber()
 
                         let orderC = await tradeIO.newOrder(source + "_" + intermediate, "sell", "limit", qtyC, price);
 
