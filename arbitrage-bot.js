@@ -21,7 +21,6 @@ var valETH = null;
 var start = async function (infos) {
     var endDayDate = moment().add(1, "day")
     log("Starting Arbitrage")
-    log(totalDailyOrderWeight, process.env.OrderDailyLimit)
     while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3) && moment().isBefore(endDayDate)) {
         var endHourDate = moment().add(1, "hour");
 
