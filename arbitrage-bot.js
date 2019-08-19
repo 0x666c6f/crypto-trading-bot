@@ -38,7 +38,7 @@ var start = async function (infos) {
                 await initArbitrage(infos)
                 if (process.env.Timeout != 0)
                     sleep.msleep(process.env.Timeout);
-                log("Arbitrages finished")
+                //log("Arbitrages finished")
                 // log("Minute Weights :")
                 // log("Minute Weight :", totalMinuteWeight)
                 // log("Minute Order Weight :", totalMinuteOrderWeight)
@@ -85,9 +85,9 @@ var start = async function (infos) {
 
 var initArbitrage = async function (infos) {
 
-    log("====================")
-    log("Launching arbitrages")
-    log("====================")
+    // log("====================")
+    // log("Launching arbitrages")
+    // log("====================")
 
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
