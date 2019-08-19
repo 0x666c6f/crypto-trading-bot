@@ -6,10 +6,10 @@ const ansi = require('ansicolor').nice
 var crypto = require("crypto");
 
 var get = function (url, auth, args) {
-    log("New GET request")
-    log("- URL = " + url)
-    log("- Auth = " + auth)
-    log("- Args = " + args)
+    // log("New GET request")
+    // log("- URL = " + url)
+    // log("- Auth = " + auth)
+    // log("- Args = " + args)
 
     let options = {
         headers: null,
@@ -29,13 +29,13 @@ var get = function (url, auth, args) {
     return new Promise((resolve, reject) => {
         request.get(options, function (err, res) {
             if (res && res.body) {
-                log("GET request successfull")
+                //log("GET request successfull")
                 resolve(JSON.parse(res.body))
             } else if (err) {
-                log.red("Error while doing GET request")
+                //log.red("Error while doing GET request")
                 resolve(JSON.parse(err))
             } else {
-                log.red("Unkown Error while doing DELETE request")
+                //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
@@ -47,9 +47,9 @@ var get = function (url, auth, args) {
 }
 
 var post = function (url, data) {
-    log("New POST request")
-    log("- URL = " + url)
-    log("- Data = " + JSON.stringify(data))
+    // log("New POST request")
+    // log("- URL = " + url)
+    // log("- Data = " + JSON.stringify(data))
 
     let options = {
         headers: {
@@ -63,13 +63,13 @@ var post = function (url, data) {
     return new Promise((resolve, reject) => {
         request.post(options, function (err, res) {
             if (res.body) {
-                log("POST request successfull")
+                //log("POST request successfull")
                 resolve(res.body)
             } else if (err) {
-                log.red("Error while doing POST request")
+                //log.red("Error while doing POST request")
                 resolve(err)
             } else {
-                log.red("Unkown Error while doing DELETE request")
+                //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
@@ -81,9 +81,9 @@ var post = function (url, data) {
 }
 
 var del = function (url, args) {
-    log("New DELETE request")
-    log("- URL = " + url)
-    log("- Args = " + args)
+    // log("New DELETE request")
+    // log("- URL = " + url)
+    // log("- Args = " + args)
 
     let options = {
         headers: {
@@ -100,13 +100,13 @@ var del = function (url, args) {
     return new Promise((resolve, reject) => {
         request.delete(options, function (err, res) {
             if (res.body) {
-                log("DELETE request successfull")
+                //log("DELETE request successfull")
                 resolve(JSON.parse(res.body))
             } else if (err) {
-                log.red("Error while doing DELETE request")
+                //log.red("Error while doing DELETE request")
                 reject(JSON.parse(err))
             } else {
-                log.red("Unkown Error while doing DELETE request")
+                //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
