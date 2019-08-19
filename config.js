@@ -6,8 +6,6 @@ const log = require('ololog').configure({
 const ansi = require('ansicolor').nice
 log("Loading config from file")
 
-process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-
 try {
   var doc = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
   if(doc){
@@ -32,7 +30,7 @@ try {
     process.env.APIMinuteLimit = doc.config.APIMinuteLimit
     process.env.APIHourlyLimit = doc.config.APIHourlyLimit
     process.env.APIDailyLimit = doc.config.APIDailyLimit
-    
+    process.env.StartDate = doc.config.StartDate
     log("Loaded config :")
     log(process.env);
   } else {
