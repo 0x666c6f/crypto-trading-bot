@@ -430,7 +430,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                 log.green("Quantity is enough for trade for symbol " + symbol)
                 let price = tickerSource.askPrice
                 
-                let qty = new Math.min(new BigNumber(maxSource / price).decimalPlaces(infos.get(symbol + "_"+source).baseAssetPrecision).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty)
+                let qty = Math.min(new BigNumber(maxSource / price).decimalPlaces(infos.get(symbol + "_"+source).baseAssetPrecision).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty)
                 var qtyIni = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_"+intermediate).baseAssetPrecision).toNumber();
 
                 log.green("Initiating order for symbol " + symbol)
