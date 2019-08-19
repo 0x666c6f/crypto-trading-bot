@@ -289,7 +289,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 
                 log("Initiating order for symbol " + symbol)
 
-                let orderA = await tradeIO.newOrder(symbol + "_btc", "buy", "limit", qty, price);
+                let orderA = await tradeIO.newOrder(symbol + "_usdt", "buy", "limit", qty, price);
                 log("Order A response :", orderA)
 
                 totalDailyWeight++;
@@ -432,22 +432,6 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                 maxSource = process.env.MaxUSDT
             }
 
-            var valIntermediate;
-            if (intermediate == "eth")
-                valIntermediate = valETH
-            else if (intermediate == "btc")
-                valIntermediate = valBTC
-            else
-                valIntermediate = valBtcEth
-
-            var valSource;
-            if (source == "eth")
-                valSource = valETH
-            else if (source == "btc")
-                valSource = valBTC
-            else
-                valSource = valBtcEth
-
             var valSourceIntermediate;
             if (source == "eth" && intermediate == "usdt")
                 valSourceIntermediate = valETH
@@ -464,12 +448,8 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
 
                 BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_"+source).baseAssetPrecision })   
 
-                let qty = Math.min(maxSource / price, tickerIntermediate.bidQty, tickerSource.askQty)
-                qty = new BigNumber(qty).toNumber()
-
-                BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_"+source).baseAssetPrecision })   
-
-                var qtyIni = new BigNumber(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty)).toNumber();
+                let qty = new BigNumber(Math.min(maxSource / price, tickerSource.askQty, tickerIntermediate.bidQty)).toNumber()
+                var qtyIni = new BigNumber(qty).toNumber();
 
                 log.green("Initiating order for symbol " + symbol)
 
