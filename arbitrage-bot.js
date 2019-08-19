@@ -94,7 +94,7 @@ var initArbitrage = async function (infos) {
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers)
-        if(tickers.error.contains("Limit is exceeded"))
+        if(tickers.error.includes("Limit is exceeded"))
         {
             log.error("Limit exceeded, going to sleep for a while")
             sleep.msleep(61000)
