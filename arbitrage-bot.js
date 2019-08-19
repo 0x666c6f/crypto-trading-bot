@@ -319,7 +319,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         price = tickerIntermediateUSDT.bidPrice;
                         qty = new BigNumber((qty - orderB.order.quoteAmount) * tickerIntermediate.bidPrice).decimalPlaces(infos.get(intermediate + "_usdt").baseAssetPrecision).toNumber()
 
-                        let orderC = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
+                        let orderC = await tradeIO.newOrder(intermediate + "_usdt", "sell", "limit", qty, price);
                         log("Order C response :", orderC)
 
                         totalDailyWeight++;
@@ -474,7 +474,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         price = tickerSourceIntermediate.askPrice;
                         qty = new BigNumber((qty - orderB.order.quoteAmount) * tickerSource.askPrice).decimalPlaces(infos.get(source + "_" + intermediate).baseAssetPrecision).toNumber()
 
-                        let orderC = await tradeIO.newOrder(source + "_" + intermediate, "sell", "limit", qty, price);
+                        let orderC = await tradeIO.newOrder(source + "_" + intermediate, "buy", "limit", qty, price);
 
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
