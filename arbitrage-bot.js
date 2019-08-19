@@ -144,7 +144,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                 qty = new BigNumber(qty).toNumber()
 
                 BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_eth").baseAssetPrecision })   
-                var qtyIni = new BigNumber(Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty)).toNumber();
+                var qtyIni = new BigNumber(qty).toNumber();
 
                 log.green("Initiating order for symbol " + symbol)
 
@@ -285,7 +285,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                 qty = new BigNumber(qty).toNumber();
 
                 BigNumber.config({ ROUNDING_MODE: 1, DECIMAL_PLACES: infos.get(symbol + "_" + intermediate).baseAssetPrecision })   
-                var qtyIni = new BigNumber(Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty)).toNumber();
+                var qtyIni = new BigNumber(qty).toNumber();
 
                 log("Initiating order for symbol " + symbol)
 
