@@ -1,8 +1,5 @@
 const request = require('request');
-const log = require('ololog').configure({
-    time: true
-})
-const ansi = require('ansicolor').nice
+const log = require('./logger').logger;
 var crypto = require("crypto");
 
 var get = function (url, auth, args) {
@@ -17,34 +14,34 @@ var get = function (url, auth, args) {
     };
 
     if (args) {
-        options.url = url + args
+        options.url = url + args;
     }
 
     if (auth) {
         options.headers = {
             Key: process.env.APIKey,
             Sign: generateSignature(args)
-        }
+        };
     }
     return new Promise((resolve, reject) => {
         request.get(options, function (err, res) {
             if (res && res.body) {
                 //log("GET request successfull")
-                resolve(JSON.parse(res.body))
+                resolve(JSON.parse(res.body));
             } else if (err) {
                 //log.red("Error while doing GET request")
-                resolve(JSON.parse(err))
+                resolve(JSON.parse(err));
             } else {
                 //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
-                }
-                reject(error)
+                };
+                reject(error);
             }
-        })
+        });
     });
-}
+};
 
 var post = function (url, data) {
     // log("New POST request")
@@ -64,21 +61,21 @@ var post = function (url, data) {
         request.post(options, function (err, res) {
             if (res.body) {
                 //log("POST request successfull")
-                resolve(res.body)
+                resolve(res.body);
             } else if (err) {
                 //log.red("Error while doing POST request")
-                resolve(err)
+                resolve(err);
             } else {
                 //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
-                }
-                reject(error)
+                };
+                reject(error);
             }
-        })
+        });
     });
-}
+};
 
 var del = function (url, args) {
     // log("New DELETE request")
@@ -94,28 +91,28 @@ var del = function (url, args) {
     };
 
     if (args) {
-        options.url = url + args
+        options.url = url + args;
     }
 
     return new Promise((resolve, reject) => {
         request.delete(options, function (err, res) {
             if (res.body) {
                 //log("DELETE request successfull")
-                resolve(JSON.parse(res.body))
+                resolve(JSON.parse(res.body));
             } else if (err) {
                 //log.red("Error while doing DELETE request")
-                reject(JSON.parse(err))
+                reject(JSON.parse(err));
             } else {
                 //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
-                }
-                reject(error)
+                };
+                reject(error);
             }
-        })
+        });
     });
-}
+};
 
 exports.get = get;
 exports.post = post;
