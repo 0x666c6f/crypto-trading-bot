@@ -184,7 +184,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                         price = tickerEthBtc.bidPrice;
 
-                        qty = new BigNumber((orderB.order.total - orderB.order.commission)/ process.env.Fees * tickerETH.bidPrice).decimalPlaces(infos.get("eth_btc").baseAssetPrecision).toNumber();
+                        qty = new BigNumber((orderB.order.total - orderB.order.commission)/ process.env.Fees).decimalPlaces(infos.get("eth_btc").baseAssetPrecision).toNumber();
 
                         let orderC = await tradeIO.newOrder("eth_btc", "sell", "limit", qty, price);
 
@@ -317,7 +317,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     if (orderB.code === 0 && orderB.order.status == "Completed") {
                         log.green("Second trade successful for arbitrage <USDT TO " + symbol + " TO " + intermediate + " TO USDT> :", orderB)
                         price = tickerIntermediateUSDT.bidPrice;
-                        qty = new BigNumber((orderB.order.total - orderB.order.commission)/process.env.Fees * tickerIntermediate.bidPrice).decimalPlaces(infos.get(intermediate + "_usdt").baseAssetPrecision).toNumber()
+                        qty = new BigNumber((orderB.order.total - orderB.order.commission)/process.env.Fees).decimalPlaces(infos.get(intermediate + "_usdt").baseAssetPrecision).toNumber()
 
                         let orderC = await tradeIO.newOrder(intermediate + "_usdt", "sell", "limit", qty, price);
                         log("Order C response :", orderC)
@@ -472,7 +472,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderB)
 
                         price = tickerSourceIntermediate.askPrice;
-                        qty = new BigNumber((orderB.order.total - orderB.order.commission)/process.env.Fees * tickerSource.askPrice).decimalPlaces(infos.get(source + "_" + intermediate).baseAssetPrecision).toNumber()
+                        qty = new BigNumber(orderB.order.total/process.env.Fees * price).decimalPlaces(infos.get(source + "_" + intermediate).baseAssetPrecision).toNumber()
 
                         let orderC = await tradeIO.newOrder(source + "_" + intermediate, "buy", "limit", qty, price);
 
