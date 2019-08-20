@@ -471,7 +471,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         log.green("Second trade successful for arbitrage <" + source + " TO " + symbol + " TO " + intermediate + " TO " + source + "> :", orderB);
 
                         price = tickerSourceIntermediate.askPrice;
-                        qty = new BigNumber((orderB.order.total - orderB.order.commission) * price).decimalPlaces(infos.get(source + "_" + intermediate).baseAssetPrecision).toNumber();
+                        qty = new BigNumber((orderB.order.total - orderB.order.commission) / price).decimalPlaces(infos.get(source + "_" + intermediate).baseAssetPrecision).toNumber();
 
                         let orderC = await tradeIO.newOrder(source + "_" + intermediate, "buy", "limit", qty, price);
 
