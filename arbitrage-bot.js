@@ -54,7 +54,6 @@ var start = async function (infos) {
                 sleep.msleep(ms + 1000);
                 log("Waking up, sleep is over !");
             }
-            log("Minute has changed, resetting minute weights");
         }
         totalHourlyWeight = 0;
         totalHourlyOrderWeight = 0;
@@ -67,7 +66,6 @@ var start = async function (infos) {
             log("Waking up, sleep is over !");
 
         }
-        log("Hour has changed, resetting hour weights");
     }
     totalDailyWeight = 0;
     totalDailyOrderWeight = 0;
@@ -79,7 +77,6 @@ var start = async function (infos) {
         log("Waking up, sleep is over !");
 
     }
-    log("Day has changed, resetting day weights");
     start();
 };
 
