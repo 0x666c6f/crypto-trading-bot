@@ -1,121 +1,121 @@
-const log = require('./logger').logger
+const log = require('./logger').logger;
 
 var http = require('./http-manager');
 
-var about = function() {
+var about = function () {
     //log("TradeIO About Request")
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint+"/api/v1/about", false, null).then(function(resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/about", false, null).then(function (resp) {
             //log("About successful")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing About request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing About request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var time = function() {
+var time = function () {
     //log("TradeIO Time Request")
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint+"/api/v1/time", false, null).then(function(resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/time", false, null).then(function (resp) {
             //log("Time successfull")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Time request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Time request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var info = function() {
+var info = function () {
     //log("TradeIO Info Request")
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint+"/api/v1/info", false, null).then(function(resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/info", false, null).then(function (resp) {
             //log("Info successfull")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Info request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Info request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var orderBook = function(symbol, limit) {
+var orderBook = function (symbol, limit) {
     //log("TradeIO Order Book Request for symbol " + symbol)
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint+"/api/v1/depth/"+symbol, false, "?limit="+limit).then(function(resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/depth/" + symbol, false, "?limit=" + limit).then(function (resp) {
             //log("Order Book for symbol "+symbol+" successfull")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Order book request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Order book request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var recentTrades = function(symbol, limit) {
+var recentTrades = function (symbol, limit) {
     //log("TradeIO Recent Trades Request for symbol " + symbol)
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint+"/api/v1/trades/"+symbol, false, "?limit="+limit).then(function(resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/trades/" + symbol, false, "?limit=" + limit).then(function (resp) {
             //log("Recent Trades for symbol "+symbol+" successfull")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Recent trades request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Recent trades request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var ticker = function(symbol) {
+var ticker = function (symbol) {
     //log("TradeIO Ticker Request for symbol " + symbol)
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint+"/api/v1/ticker/"+symbol, false, null).then(function(resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/ticker/" + symbol, false, null).then(function (resp) {
             //log("Ticker for symbol "+symbol+" successfull")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Ticker request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Ticker request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var tickers = function(symbol) {
+var tickers = function (symbol) {
     //log("TradeIO Tickers Request")
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint+"/api/v1/tickers", false, null).then(function(resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/tickers", false, null).then(function (resp) {
             //log("Tickers successfull")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Tickers request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Tickers request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var newOrder = function(symbol, side, type, quantity, price, stopPrice) {
-    log("TradeIO New Order Request")
+var newOrder = function (symbol, side, type, quantity, price, stopPrice) {
+    log("TradeIO New Order Request");
     return new Promise((resolve, reject) => {
         var ts = new Date().getTime();
 
@@ -124,64 +124,64 @@ var newOrder = function(symbol, side, type, quantity, price, stopPrice) {
             "Side": side,
             "Type": type,
             "Quantity": quantity,
-            "ts": ""+ts,
-        }
+            "ts": "" + ts,
+        };
 
-        if(price)
-            order.Price = price
+        if (price)
+            order.Price = price;
         if (stopPrice)
-            order.StopPrice = stopPrice
+            order.StopPrice = stopPrice;
 
-        log("\t Order :", JSON.stringify(order, null, 2))
+        log("\t Order :", JSON.stringify(order, null, 2));
 
-        http.post(process.env.APIEndpoint+"/api/v1/order", order).then(function(resp) {
-            log("New Order request successfull")
-            resolve(resp)
-        }, function(error){
-            log.red("Error while doing New order request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
-            log.red("Error while doing New order request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+        http.post(process.env.APIEndpoint + "/api/v1/order", order).then(function (resp) {
+            log("New Order request successfull");
+            resolve(resp);
+        }, function (error) {
+            log.red("Error while doing New order request = " + JSON.stringify(error, null, 2));
+            reject(error);
+        }).catch(function (err) {
+            log.red("Error while doing New order request = " + JSON.stringify(err, null, 2));
+            reject(err);
+        });
     });
-}
+};
 
-var cancelOrder = function(orderId) {
+var cancelOrder = function (orderId) {
     //log("TradeIO Cancel Order Request")
     return new Promise((resolve, reject) => {
         var ts = new Date().getTime();
 
-        http.del(process.env.APIEndpoint+"/api/v1/order/"+orderId, "?ts="+ts).then(function(resp) {
-           //log("Cancel successful")
-            resolve(resp)
-        }, function(error){
+        http.del(process.env.APIEndpoint + "/api/v1/order/" + orderId, "?ts=" + ts).then(function (resp) {
+            //log("Cancel successful")
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Cancel order request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Cancel order request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
-var cancelAllOrders = function() {
+var cancelAllOrders = function () {
     //log("TradeIO Cancel All Orders Request")
     return new Promise((resolve, reject) => {
         var ts = new Date().getTime();
 
-        http.del(process.env.APIEndpoint+"/api/v1/orders", "?ts="+ts).then(function(resp) {
+        http.del(process.env.APIEndpoint + "/api/v1/orders", "?ts=" + ts).then(function (resp) {
             //log("Cancel orders successfull")
-            resolve(resp)
-        }, function(error){
+            resolve(resp);
+        }, function (error) {
             //log.red("Error while doing Cancel all orders request = "+ JSON.stringify(error, null, 2))
-            reject(error)
-        }).catch(function(err){
+            reject(error);
+        }).catch(function (err) {
             //log.red("Error while doing Cancel all orders request = "+ JSON.stringify(err, null, 2))
-            reject(err)
-        })
+            reject(err);
+        });
     });
-}
+};
 
 exports.about = about;
 exports.time = time;

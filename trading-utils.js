@@ -1,33 +1,33 @@
 var formatTickers = function (tickers) {
     let formattedTickers = new Map();
-    let ethPairs = new Array();
-    let btcPairs = new Array();
-    let usdtPairs = new Array()
-    let symbols = new Array()
+    let ethPairs = [];
+    let btcPairs = [];
+    let usdtPairs = [];
+    let symbols = [];
     tickers.forEach(ticker => {
-        let symbol = ticker.symbol.split("_")[0]
+        let symbol = ticker.symbol.split("_")[0];
         if (process.env.Exclusions.indexOf(symbol) == -1) {
             formattedTickers.set(ticker.symbol, ticker);
             if (ticker.symbol.indexOf("_eth") != -1) {
-                ethPairs.push(ticker)
+                ethPairs.push(ticker);
             }
             if (ticker.symbol.indexOf("_btc") != -1) {
-                btcPairs.push(ticker)
+                btcPairs.push(ticker);
             }
             if (ticker.symbol.indexOf("_usdt") != -1) {
-                usdtPairs.push(ticker)
+                usdtPairs.push(ticker);
             }
 
             if (symbols.indexOf(symbol) == -1) {
-                symbols.push(symbol)
+                symbols.push(symbol);
             }
         }
     });
 
-    formattedTickers.set("symbols", symbols)
+    formattedTickers.set("symbols", symbols);
 
     return formattedTickers;
-}
+};
 
 var formatInfos = function (infos) {
     let formattedInfos = new Map();
@@ -35,12 +35,12 @@ var formatInfos = function (infos) {
         formattedInfos.set(info.symbol, info);
     });
     return formattedInfos;
-}
+};
 
 var generateSignature = function (args) {
     return crypto.createHmac('sha512', process.env.APISecret).update(args).digest('hex');
 }
-
+;
 
 exports.formatTickers = formatTickers;
 exports.formatInfos = formatInfos;
