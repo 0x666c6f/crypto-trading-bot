@@ -3,11 +3,11 @@ config:
   APISecret: XXX
   APIEndpoint: https://api.exchange.trade.io
   MinBTC: 0.001
-  MaxBTC: 0.00123830
+  MaxBTC: 0.00124917
   MinETH: 0.01
-  MaxETH: 0.10000008
+  MaxETH: 0.10601104
   MinUSDT: 10
-  MaxUSDT: 13.31731195
+  MaxUSDT: 13.49780321
   MinProfit: 1.003
   OrderMinuteLimit: 600
   OrderHourlyLimit : 3600
@@ -15,11 +15,11 @@ config:
   APIMinuteLimit: 1200
   APIHourlyLimit : 60000
   APIDailyLimit : 1400000
-  Timeout: 300
+  Timeout: 900
   Simulation: true
   Fees: 1.001
   LogLevel: INFO
-  StartDate: "2019-08-19 11:16:00"
+  StartDate: "2019-08-21 14:10:00"
   Exclusions:
     - ktos
     - btnt
