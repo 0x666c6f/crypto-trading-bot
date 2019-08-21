@@ -27,10 +27,30 @@ var get = function (url, auth, args) {
         request.get(options, function (err, res) {
             if (res && res.body) {
                 //log("GET request successfull")
-                resolve(JSON.parse(res.body));
+
+                let response;
+                try {
+                    response =JSON.parse(res.body);
+                } catch (error) {
+                    log.error("Error while parsing GET response :", error);
+                    response = {
+                        error: error
+                    };
+                }
+                resolve(response);
             } else if (err) {
                 //log.red("Error while doing GET request")
-                resolve(JSON.parse(err));
+
+                let response;
+                try {
+                    response =JSON.parse(err);
+                } catch (error) {
+                    log.error("Error while parsing GET response :", error);
+                    response = {
+                        error: error
+                    };
+                }
+                reject(response);
             } else {
                 //log.red("Unkown Error while doing DELETE request")
                 let error = {
@@ -61,10 +81,28 @@ var post = function (url, data) {
         request.post(options, function (err, res) {
             if (res.body) {
                 //log("POST request successfull")
-                resolve(res.body);
+                let response;
+                try {
+                    response =JSON.parse(res.body);
+                } catch (error) {
+                    log.error("Error while parsing POST response :", error);
+                    response = {
+                        error: error
+                    };
+                }
+                resolve(response);
             } else if (err) {
                 //log.red("Error while doing POST request")
-                resolve(err);
+                let response;
+                try {
+                    response =JSON.parse(err);
+                } catch (error) {
+                    log.error("Error while parsing POST response :", error);
+                    response = {
+                        error: error
+                    };
+                }
+                reject(response);
             } else {
                 //log.red("Unkown Error while doing DELETE request")
                 let error = {
@@ -98,10 +136,28 @@ var del = function (url, args) {
         request.delete(options, function (err, res) {
             if (res.body) {
                 //log("DELETE request successfull")
-                resolve(JSON.parse(res.body));
+                let response;
+                try {
+                    response =JSON.parse(res.body);
+                } catch (error) {
+                    log.error("Error while parsing DELETE response :", error);
+                    response = {
+                        error: error
+                    };
+                }
+                resolve(response);
             } else if (err) {
                 //log.red("Error while doing DELETE request")
-                reject(JSON.parse(err));
+                let response;
+                try {
+                    response =JSON.parse(err);
+                } catch (error) {
+                    log.error("Error while parsing DELETE response :", error);
+                    response = {
+                        error: error
+                    };
+                }
+                reject(response);
             } else {
                 //log.red("Unkown Error while doing DELETE request")
                 let error = {
