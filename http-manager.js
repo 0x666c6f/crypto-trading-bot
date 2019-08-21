@@ -81,15 +81,16 @@ var post = function (url, data) {
         request.post(options, function (err, res) {
             if (res.body) {
                 //log("POST request successfull")
-                let response;
+                let response;                
                 try {
-                    response =JSON.parse(res.body);
+                    response = res.body;
                 } catch (error) {
                     log.error("Error while parsing POST response :", error);
                     response = {
                         error: error
                     };
                 }
+
                 resolve(response);
             } else if (err) {
                 //log.red("Error while doing POST request")
