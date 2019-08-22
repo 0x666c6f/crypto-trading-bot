@@ -44,7 +44,7 @@ var info = function () {
             //log.red("Error while doing Info request = "+ JSON.stringify(error, null, 2))
             reject(error);
         }).catch(function (err) {
-            //log.red("Error while doing Info request = "+ JSON.stringify(err, null, 2))
+            //log.red("Unkown Error while doing Info request = "+ JSON.stringify(err, null, 2))
             reject(err);
         });
     });
@@ -102,7 +102,7 @@ var tickers = function (symbol) {
     //log("TradeIO Tickers Request")
     return new Promise((resolve, reject) => {
         http.get(process.env.APIEndpoint + "/api/v1/tickers", false, null).then(function (resp) {
-            //log("Tickers successfull")
+            // log("Tickers successfull")
             resolve(resp);
         }, function (error) {
             //log.red("Error while doing Tickers request = "+ JSON.stringify(error, null, 2))
