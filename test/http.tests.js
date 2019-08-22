@@ -6,7 +6,7 @@ chai.use(chaiHttp);
 const should = chai.should();
 const http = require('../http-manager');
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 describe('HTTP Tests', () => {
     describe('HTTP GET Tests', () => {
@@ -110,7 +110,7 @@ describe('HTTP Tests', () => {
         });
     
     
-        it('It should make a failed POST request with a HTTP error', (done) => {
+        it('It should make a failed DELETE request with a HTTP error', (done) => {
             var ts = new Date().getTime();
     
             http.del(process.env.APIEndpoint + "/api/v1/orderssss", "?ts=" + ts).then(function (resp) {
