@@ -28,17 +28,8 @@ var get = function (url, auth, args) {
         request.get(options, function (err, res) {
             if (res && res.body) {
                 //log("GET request successfull")
-
-                let response;
-                try {
-                    response =JSON.parse(res.body);
-                } catch (error) {
-                    log.error.red("Error while parsing GET response :", error);
-                    response = {
-                        error: error
-                    };
-                }
-                resolve(response);
+   
+                resolve(res.body);
             } else if (err) {
                 log.error.red("Error for GET response :", error);
                 reject(response);
