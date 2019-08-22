@@ -217,7 +217,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
-                            if(resp.order.status == "Cancelled"){ 
+                            if(resp.code === 0){ 
                                 log.warn("First trade has been canceled for arbitrage <btc->" + symbol + "->eth->btc> :", resp);
                             } else {
                                 log.warn("Error while cancelling first trade for arbitrage <btc->" + symbol + "->eth->btc> :", resp);
@@ -346,7 +346,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
-                            if(resp.order.status == "Cancelled"){ 
+                            if(resp.code === 0){ 
                                 log.warn("First trade has been canceled for arbitrage <usdt->" + symbol + "->" + intermediate + "-> usdt> :", resp);
                             } else {
                                 log.warn("Error while cancelling first trade for arbitrage <usdt->" + symbol + "->" + intermediate + "->usdt> :", resp);
@@ -502,7 +502,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
-                            if(resp.order.status == "Cancelled"){ 
+                            if(resp.code === 0){ 
                                 log.warn("First trade has been canceled for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", resp);
                             } else {
                                 log.warn("Error while cancelling first trade for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", resp);
