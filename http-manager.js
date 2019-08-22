@@ -1,16 +1,12 @@
 const request = require('request');
 const log = require('./logger').logger;
-var crypto = require("crypto");
 var utils = require("./trading-utils");
 
 var get = function (url, auth, args) {
-    // log("New GET request")
-    // log("- URL = " + url)
-    // log("- Auth = " + auth)
-    // log("- Args = " + args)
-
     let options = {
-        headers: null,
+        headers: {
+            'content-type': 'application/json'
+        },
         url: url
     };
 
@@ -21,20 +17,33 @@ var get = function (url, auth, args) {
     if (auth) {
         options.headers = {
             Key: process.env.APIKey,
-            Sign: utils.generateSignature(args)
+            Sign: utils.generateSignature(args),
+            'content-type': 'application/json'
         };
     }
     return new Promise((resolve, reject) => {
         request.get(options, function (err, res) {
             if (res && res.body) {
-                //log("GET request successfull")
-   
-                resolve(res.body);
+                let response;
+                try {
+                    response = JSON.parse(res.body);
+                } catch (error) {
+                    response = {
+                        error: error
+                    };
+                }
+                resolve(response);
             } else if (err) {
-                log.error.red("Error for GET response :", error);
+                let response;
+                try {
+                    response = JSON.parse(err);
+                } catch (error) {
+                    response = {
+                        error: error
+                    };
+                }
                 reject(response);
             } else {
-                //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
@@ -46,14 +55,11 @@ var get = function (url, auth, args) {
 };
 
 var post = function (url, data) {
-    // log("New POST request")
-    // log("- URL = " + url)
-    // log("- Data = " + JSON.stringify(data))
-
     let options = {
         headers: {
             Key: process.env.APIKey,
-            Sign: utils.generateSignature(args)
+            Sign: utils.generateSignature(JSON.stringify(data)),
+            'Content-Type': 'application/json'
         },
         url: url,
         json: data
@@ -61,33 +67,11 @@ var post = function (url, data) {
 
     return new Promise((resolve, reject) => {
         request.post(options, function (err, res) {
-            if (res.body) {
-                //log("POST request successfull")
-                let response;                
-                try {
-                    response = res.body;
-                } catch (error) {
-                    log.error("Error while parsing POST response :", error);
-                    response = {
-                        error: error
-                    };
-                }
-
-                resolve(response);
+            if (res && res.body) {
+                resolve(res.body);
             } else if (err) {
-                //log.red("Error while doing POST request")
-                let response;
-                try {
-                    response =JSON.parse(err);
-                } catch (error) {
-                    log.error("Error while parsing POST response :", error);
-                    response = {
-                        error: error
-                    };
-                }
                 reject(response);
             } else {
-                //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage
@@ -99,14 +83,11 @@ var post = function (url, data) {
 };
 
 var del = function (url, args) {
-    // log("New DELETE request")
-    // log("- URL = " + url)
-    // log("- Args = " + args)
-
     let options = {
         headers: {
             Key: process.env.APIKey,
-            Sign: utils.generateSignature(args)
+            Sign: utils.generateSignature(args),
+            'Content-Type': 'application/json'
         },
         url: url,
     };
@@ -117,32 +98,27 @@ var del = function (url, args) {
 
     return new Promise((resolve, reject) => {
         request.delete(options, function (err, res) {
-            if (res.body) {
-                //log("DELETE request successfull")
+            if (res && res.body) {
                 let response;
                 try {
-                    response =JSON.parse(res.body);
+                    response = JSON.parse(res.body);
                 } catch (error) {
-                    log.error("Error while parsing DELETE response :", error);
                     response = {
                         error: error
                     };
                 }
-                resolve(response);
+                resolve(response);            
             } else if (err) {
-                //log.red("Error while doing DELETE request")
                 let response;
                 try {
-                    response =JSON.parse(err);
+                    response = JSON.parse(err);
                 } catch (error) {
-                    log.error("Error while parsing DELETE response :", error);
                     response = {
                         error: error
                     };
                 }
                 reject(response);
             } else {
-                //log.red("Unkown Error while doing DELETE request")
                 let error = {
                     code: res.statusCode,
                     message: res.statusMessage

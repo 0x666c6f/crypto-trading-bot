@@ -1,3 +1,5 @@
+var crypto = require("crypto");
+
 var formatTickers = function (tickers) {
     let formattedTickers = new Map();
     let ethPairs = [];
