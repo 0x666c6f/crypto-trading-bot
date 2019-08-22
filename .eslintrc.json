@@ -1,6 +1,6 @@
 {
     "env": {
-        "es6": true,
+        "es8": true,
         "node": true
     },
     "extends": [
@@ -16,5 +16,4 @@
     },
     "rules": {
     },
-    "esversion":6
 }
