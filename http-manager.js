@@ -70,7 +70,10 @@ var post = function (url, data) {
             if (res && res.body) {
                 resolve(res.body);
             } else if (err) {
-                reject(response);
+                let error = {
+                    error : err
+                };
+                reject(error);
             } else {
                 let error = {
                     code: res.statusCode,
