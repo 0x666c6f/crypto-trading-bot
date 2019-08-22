@@ -1,6 +1,7 @@
 const request = require('request');
 const log = require('./logger').logger;
 var crypto = require("crypto");
+var utils = require("./trading-utils");
 
 var get = function (url, auth, args) {
     // log("New GET request")
@@ -20,7 +21,7 @@ var get = function (url, auth, args) {
     if (auth) {
         options.headers = {
             Key: process.env.APIKey,
-            Sign: generateSignature(args)
+            Sign: utils.generateSignature(args)
         };
     }
     return new Promise((resolve, reject) => {
@@ -32,24 +33,14 @@ var get = function (url, auth, args) {
                 try {
                     response =JSON.parse(res.body);
                 } catch (error) {
-                    log.error("Error while parsing GET response :", error);
+                    log.error.red("Error while parsing GET response :", error);
                     response = {
                         error: error
                     };
                 }
                 resolve(response);
             } else if (err) {
-                //log.red("Error while doing GET request")
-
-                let response;
-                try {
-                    response =JSON.parse(err);
-                } catch (error) {
-                    log.error("Error while parsing GET response :", error);
-                    response = {
-                        error: error
-                    };
-                }
+                log.error.red("Error for GET response :", error);
                 reject(response);
             } else {
                 //log.red("Unkown Error while doing DELETE request")
@@ -71,7 +62,7 @@ var post = function (url, data) {
     let options = {
         headers: {
             Key: process.env.APIKey,
-            Sign: crypto.createHmac('sha512', process.env.APISecret).update(JSON.stringify(data)).digest('hex')
+            Sign: utils.generateSignature(args)
         },
         url: url,
         json: data
@@ -124,7 +115,7 @@ var del = function (url, args) {
     let options = {
         headers: {
             Key: process.env.APIKey,
-            Sign: generateSignature(args)
+            Sign: utils.generateSignature(args)
         },
         url: url,
     };
