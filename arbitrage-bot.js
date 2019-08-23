@@ -91,11 +91,9 @@ var initArbitrage = async function (infos) {
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers);
-        if (tickers.error.includes("Limit is exceeded")) {
-            log.error("Limit exceeded, going to sleep for a while");
-            sleep.msleep(61000);
-            log.error("Limit reset, getting back to work !");
-        }
+        log.error("Going to sleep for a while");
+        sleep.msleep(61000);
+        log.error("Nap is over, getting back to work !");
         return;
     }
     totalDailyWeight += 20;
