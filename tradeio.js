@@ -1,6 +1,7 @@
 const log = require('./logger').logger;
 
 var http = require('./http-manager');
+const querystring = require('querystring');
 
 var about = function () {
     //log("TradeIO About Request")
@@ -69,7 +70,7 @@ var orderBook = function (symbol, limit) {
 var recentTrades = function (symbol, limit) {
     //log("TradeIO Recent Trades Request for symbol " + symbol)
     return new Promise((resolve, reject) => {
-        http.get(process.env.APIEndpoint + "/api/v1/trades/" + symbol, false, "?limit=" + limit).then(function (resp) {
+        http.get(process.env.APIEndpoint + "/api/v1/trades/" + symbol, true, "?ts="+new Date().getTime()+"&limit=" + limit).then(function (resp) {
             //log("Recent Trades for symbol "+symbol+" successfull")
             resolve(resp);
         }, function (error) {
@@ -77,6 +78,39 @@ var recentTrades = function (symbol, limit) {
             reject(error);
         }).catch(function (err) {
             //log.red("Error while doing Recent trades request = "+ JSON.stringify(err, null, 2))
+            reject(err);
+        });
+    });
+};
+
+var closedTrades = function (symbol, start, end, page, perPage) {
+    //log("TradeIO Recent Trades Request for symbol " + symbol)
+    let params = {
+        ts: new Date().getTime()
+    };
+
+    if (start){
+        params.start = start;
+    }
+
+    if (end){
+        params.end = end;
+    }
+
+    if (page){
+        params.page = page;
+    }
+
+    if (perPage){
+        params.perPage = perPage;
+    }
+
+    return new Promise((resolve, reject) => {
+        http.get(process.env.APIEndpoint + "/api/v1/closedOrders/" + symbol, true, "?"+querystring.stringify(params)).then(function (resp) {
+            resolve(resp);
+        }, function (error) {
+            reject(error);
+        }).catch(function (err) {
             reject(err);
         });
     });
@@ -193,3 +227,4 @@ exports.tickers = tickers;
 exports.newOrder = newOrder;
 exports.cancelOrder = cancelOrder;
 exports.cancelAllOrders = cancelAllOrders;
+exports.closedTrades = closedTrades;
