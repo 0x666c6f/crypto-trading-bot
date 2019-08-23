@@ -142,7 +142,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                 let price = tickerBTC.askPrice;
 
                 var qty = Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty);
-                qty = new BigNumber(qty / process.env.Fees).decimalPlaces(infos.get(symbol + "_btc").baseAssetPrecision).toNumber();
+                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_btc").baseAssetPrecision).toNumber();
                 qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_eth").baseAssetPrecision).toNumber();
 
                 log.green("Initiating order for symbol " + symbol);
@@ -277,7 +277,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 
                 let price = tickerUSDT.askPrice;
                 var qty = Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty);
-                qty = new BigNumber(qty / process.env.Fees).decimalPlaces(infos.get(symbol + "_usdt").baseAssetPrecision).toNumber();
+                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_usdt").baseAssetPrecision).toNumber();
                 qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
 
                 log("Initiating order for symbol " + symbol);
@@ -432,7 +432,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                 let price = tickerSource.askPrice;
 
                 var qty = Math.min(new BigNumber(maxSource / price).decimalPlaces(infos.get(symbol + "_" + source).baseAssetPrecision).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty);
-                qty = new BigNumber(qty / process.env.Fees).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
+                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
 
                 log.green("Initiating order for symbol " + symbol);
 
