@@ -57,10 +57,17 @@ tradeIO.tickers().then(async function (tickers){
     volumes.set("total_eth",ethVol);
     volumes.set("total_usdt", usdtVol);
     volumes.set("total",usdtVol + valEth*ethVol + valBTC*btcVol);
-    log.green("\tTotal btc :", volumes.get("total_btc"));
-    log.green("\tTotal eth :", volumes.get("total_eth"));
-    log.green("\tTotal usdt :", volumes.get("total_usdt"));
-    log.green("\tTotal daily :", volumes.get("total"));
+
+    for (var entry of volumes.entries()) {
+        var key = entry[0],
+            value = entry[1];
+        log.red(key.toUpperCase()+" volume = ", value);
+    }
+
+    log.green("\tTotal btc :", btcVol);
+    log.green("\tTotal eth :", ethVol);
+    log.green("\tTotal usdt :", usdtVol);
+    log.green("\tTotal daily :", usdtVol + valEth*ethVol + valBTC*btcVol);
 
 });
 
