@@ -20,9 +20,11 @@ log.green("Arbitrage bot starting date is set at :", start.toDate());
 tradeio.account().then(function (balances) {
     log.green("Initiating balance from account...");
     log.green("Balances :", balances);
-    process.env.MaxBTC = balances.get("btc");
-    process.env.MaxUSDT = balances.get("usdt");
-    process.env.MaxETH = balances.get("eth");
+    if(balances.size > 0){
+        process.env.MaxBTC = balances.get("btc");
+        process.env.MaxUSDT = balances.get("usdt");
+        process.env.MaxETH = balances.get("eth");
+    }
 });
 
 
