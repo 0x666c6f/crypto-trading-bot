@@ -15,7 +15,7 @@ config:
   APIMinuteLimit: 920
   APIHourlyLimit : 60000
   APIDailyLimit : 1400000
-  Timeout: 300
+  Timeout: 0
   Simulation: true
   Fees: 1.001
   LogLevel: INFO
