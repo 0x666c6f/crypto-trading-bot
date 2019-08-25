@@ -6,7 +6,7 @@ const ansi = require('ansicolor').nice;
 log("Loading config from file");
 
 try {
-  var doc = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
+  var doc = yaml.safeLoad(fs.readFileSync(__dirname+'/config.yaml', 'utf8'));
   if(doc){
     process.env.APIKey = doc.config.APIKey;
     process.env.APISecret = doc.config.APISecret;
