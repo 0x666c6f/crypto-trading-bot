@@ -32,11 +32,11 @@ var start = async function (infos) {
         // log("Daily Order Weight :", totalDailyOrderWeight)
         while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3) && moment().isBefore(endHourDate)) {
             var endMinuteDate = moment().add(1, "minute");
-
+            var endSecond = moment().set("second", process.env.EndSecond);
             // log("Hourly Weights :")
             // log("Hourly Weight :", totalHourlyWeight)
             // log("Hourly Order Weight :", totalHourlyOrderWeight)
-            while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && moment().isBefore(endMinuteDate)) {
+            while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && moment().isBefore(endMinuteDate) && moment().isBefore(endSecond)) {
                 await initArbitrage(infos);
                 if (process.env.Timeout != 0)
                     sleep.msleep(process.env.Timeout);
@@ -51,7 +51,7 @@ var start = async function (infos) {
             if (now.isBefore(endMinuteDate)) {
                 let ms = endMinuteDate.diff(now, 'milliseconds');
                 log("Will sleep", ms, "to reset minute weight");
-                sleep.msleep(ms + 1000);
+                sleep.msleep(ms);
                 log("Waking up, sleep is over !");
             }
         }
@@ -62,7 +62,7 @@ var start = async function (infos) {
             let ms = endHourDate.diff(now, 'milliseconds');
 
             log("Will sleep", ms, "to reset hour weight");
-            sleep.msleep(ms + 1000);
+            sleep.msleep(ms);
             log("Waking up, sleep is over !");
 
         }
@@ -73,7 +73,7 @@ var start = async function (infos) {
     if (now.isBefore(endDayDate)) {
         let ms = endDayDate.diff(now, 'milliseconds');
         log("Will sleep", ms, "to reset day weight");
-        sleep.msleep(ms + 1000);
+        sleep.msleep(ms);
         log("Waking up, sleep is over !");
 
     }
@@ -91,8 +91,9 @@ var initArbitrage = async function (infos) {
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers);
-        log.error("Going to sleep for a while");
-        sleep.msleep(61000);
+        let sleepTime = moment().diff(moment().add("minute",1).set("second",process.env.StartSecond));
+        log.error("Going to sleep for a while to reset limit :", sleepTime);
+        sleep.msleep(sleepTime);
         log.error("Nap is over, getting back to work !");
         return;
     }
