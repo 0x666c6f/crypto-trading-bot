@@ -217,6 +217,23 @@ var cancelAllOrders = function () {
     });
 };
 
+var account = function () {
+    return new Promise((resolve, reject) => {
+        var ts = new Date().getTime();
+        http.get(process.env.APIEndpoint + "/api/v1/account", true, "?ts=" + ts).then(function (resp) {
+            let balances = new Map();
+            for(let balance of resp.balances){
+                balances.set(balance.asset, balance.available);
+            }
+            log(balances);
+            resolve(balances);
+        }, function (error) {
+            reject(error);
+        }).catch(function (err) {
+            reject(err);
+        });
+    });
+};
 exports.about = about;
 exports.time = time;
 exports.info = info;
@@ -228,3 +245,4 @@ exports.newOrder = newOrder;
 exports.cancelOrder = cancelOrder;
 exports.cancelAllOrders = cancelAllOrders;
 exports.closedTrades = closedTrades;
+exports.account = account;
