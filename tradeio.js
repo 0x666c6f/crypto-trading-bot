@@ -225,7 +225,6 @@ var account = function () {
             for(let balance of resp.balances){
                 balances.set(balance.asset, balance.available);
             }
-            log(balances);
             resolve(balances);
         }, function (error) {
             reject(error);
