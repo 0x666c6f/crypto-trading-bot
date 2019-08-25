@@ -45,6 +45,14 @@ var start = async function (infos) {
                 // log("Minute Weight :", totalMinuteWeight)
                 // log("Minute Order Weight :", totalMinuteOrderWeight)
             }
+
+            //update bot max balance data
+            //Temp as long as we don't have enough liquidity
+            let balances = await tradeIO.account();
+            process.env.MaxBTC = balances.get("btc");
+            process.env.MaxUSDT = balances.get("usdt");
+            process.env.MaxETH = balances.get("eth");
+
             totalMinuteWeight = 0;
             totalMinuteOrderWeight = 0;
             let now = moment();

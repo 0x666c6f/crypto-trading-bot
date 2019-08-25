@@ -17,6 +17,15 @@ start.set("second", process.env.StartSecond);
 
 log.green("Arbitrage bot starting date is set at :", start.toDate());
 
+tradeio.account().then(function (balances) {
+    log.green("Initating balance from account...");
+    log.green("Balances :", balances);
+    process.env.MaxBTC = balances.get("btc");
+    process.env.MaxUSDT = balances.get("usdt");
+    process.env.MaxETH = balances.get("eth");
+});
+
+
 const job = new CronJob(start, function() {
     log.green("Starting date reached, waking up !");
 
