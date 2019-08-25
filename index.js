@@ -18,7 +18,7 @@ start.set("second", process.env.StartSecond);
 log.green("Arbitrage bot starting date is set at :", start.toDate());
 
 tradeio.account().then(function (balances) {
-    log.green("Initating balance from account...");
+    log.green("Initiating balance from account...");
     log.green("Balances :", balances);
     process.env.MaxBTC = balances.get("btc");
     process.env.MaxUSDT = balances.get("usdt");
