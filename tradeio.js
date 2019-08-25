@@ -222,8 +222,10 @@ var account = function () {
         var ts = new Date().getTime();
         http.get(process.env.APIEndpoint + "/api/v1/account", true, "?ts=" + ts).then(function (resp) {
             let balances = new Map();
-            for(let balance of resp.balances){
-                balances.set(balance.asset, balance.available);
+            if(resp.balances){
+                for(let balance of resp.balances){
+                    balances.set(balance.asset, balance.available);
+                }
             }
             resolve(balances);
         }, function (error) {
