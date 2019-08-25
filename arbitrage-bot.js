@@ -102,7 +102,7 @@ var initArbitrage = async function (infos) {
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers);
-        let sleepTime = moment().add(1,"minute").set("second",process.env.StartSecond).diff(moment());
+        let sleepTime = moment().add(2,"minute").set("second",process.env.StartSecond).diff(moment());
         log.error("Going to sleep for a while to reset limit :", sleepTime);
         sleep.msleep(sleepTime);
         log.error("Nap is over, getting back to work !");
