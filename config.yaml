@@ -3,11 +3,11 @@ config:
   APISecret: 100ad32f-5e7b-4a37-8c7f-e1199d1943db
   APIEndpoint: https://api.exchange.trade.io
   MinBTC: 0.001
-  MaxBTC: 0.00154468
+  MaxBTC: 0.00178125
   MinETH: 0.01
-  MaxETH: 0.08501381
+  MaxETH: 0.07697936
   MinUSDT: 10
-  MaxUSDT: 15.33288104
+  MaxUSDT: 15.60435849
   MinProfit: 1.003
   OrderMinuteLimit: 600
   OrderHourlyLimit : 3600
