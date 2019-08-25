@@ -7,7 +7,7 @@ config:
   MinETH: 0.01
   MaxETH: 0.07697936
   MinUSDT: 10
-  MaxUSDT: 15.60435849
+  MaxUSDT: 15.60187466
   MinProfit: 1.003
   OrderMinuteLimit: 600
   OrderHourlyLimit : 3600
