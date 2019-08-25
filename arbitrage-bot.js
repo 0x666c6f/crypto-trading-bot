@@ -48,10 +48,13 @@ var start = async function (infos) {
 
             //update bot max balance data
             //Temp as long as we don't have enough liquidity
+            log.green("Updating balances");
             let balances = await tradeIO.account();
-            process.env.MaxBTC = balances.get("btc");
-            process.env.MaxUSDT = balances.get("usdt");
-            process.env.MaxETH = balances.get("eth");
+            if(balances.size > 0){
+                process.env.MaxBTC = balances.get("btc");
+                process.env.MaxUSDT = balances.get("usdt");
+                process.env.MaxETH = balances.get("eth");
+            }
 
             totalMinuteWeight = 0;
             totalMinuteOrderWeight = 0;
@@ -99,7 +102,7 @@ var initArbitrage = async function (infos) {
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers);
-        let sleepTime = moment().diff(moment().add(1,"minute").set("second",process.env.StartSecond));
+        let sleepTime = moment().add(1,"minute").set("second",process.env.StartSecond).diff(moment());
         log.error("Going to sleep for a while to reset limit :", sleepTime);
         sleep.msleep(sleepTime);
         log.error("Nap is over, getting back to work !");
