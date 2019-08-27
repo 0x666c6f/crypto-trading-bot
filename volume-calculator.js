@@ -5,12 +5,15 @@ var tradeIO = require('./tradeio');
 const moment = require("moment");
 
 const volumes = new Map();
+let btcVol = 0;
+let ethVol = 0;
+let usdtVol = 0;
+let tradeNb = 0;
+
 log.green("Processing volumes ...");
 tradeIO.tickers().then(async function (tickers){
     const formattedTickers = trading_utils.formatTickers(tickers.tickers);
-    let btcVol = 0;
-    let ethVol = 0;
-    let usdtVol = 0;
+ 
     const valBTC = formattedTickers.get('btc_usdt').askPrice;
     const valEth = formattedTickers.get('eth_usdt').askPrice;
 
@@ -27,6 +30,7 @@ tradeIO.tickers().then(async function (tickers){
                 for(const trade of tickerTrades.data){
                     let date = moment(trade.createdAt, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ");
                     if(moment().dayOfYear() == date.dayOfYear() && trade.status ==="Completed"){
+                        tradeNb++;
                         tickerVolume += parseFloat(trade.total);
                         switch (baseAsset) {
                             case "eth":
@@ -67,6 +71,8 @@ tradeIO.tickers().then(async function (tickers){
     log.green("\tTotal btc :", btcVol);
     log.green("\tTotal eth :", ethVol);
     log.green("\tTotal usdt :", usdtVol);
+    log.green("\tTotal daily trades :", tradeNb);
+    log.green("\tTotal daily arbitrages :", tradeNb/3);
     log.green("\tTotal daily :", usdtVol + valEth*ethVol + valBTC*btcVol);
 
 });
