@@ -12,7 +12,7 @@ config:
   OrderMinuteLimit: 600
   OrderHourlyLimit : 3600
   OrderDailyLimit : 86000
-  APIMinuteLimit: 920
+  APIMinuteLimit: 970
   APIHourlyLimit : 60000
   APIDailyLimit : 1400000
   Timeout: 0
