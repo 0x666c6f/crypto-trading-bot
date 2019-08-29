@@ -10,7 +10,7 @@ let ethVol = 0;
 let usdtVol = 0;
 let tradeNb = 0;
 
-log.green("Processing volumes ...");
+//log.green("Processing volumes ...");
 tradeIO.tickers().then(async function (tickers){
     const formattedTickers = trading_utils.formatTickers(tickers.tickers);
  
@@ -18,7 +18,7 @@ tradeIO.tickers().then(async function (tickers){
     const valEth = formattedTickers.get('eth_usdt').askPrice;
 
     for (const ticker of tickers.tickers) {
-        log("Processing volume for pair :", ticker.symbol.toUpperCase());
+        //("Processing volume for pair :", ticker.symbol.toUpperCase());
         let baseAsset = ticker.symbol.split("_")[1];
         let tickerVolume = 0;
 
@@ -65,7 +65,7 @@ tradeIO.tickers().then(async function (tickers){
     for (var entry of volumes.entries()) {
         var key = entry[0],
             value = entry[1];
-        log.red(key.toUpperCase()+" volume = ", value);
+        //log.red(key.toUpperCase()+" volume = ", value);
     }
 
     log.green("\tTotal btc :", btcVol);
