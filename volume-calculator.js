@@ -10,7 +10,9 @@ let ethVol = 0;
 let usdtVol = 0;
 let tradeNb = 0;
 
-log.green("Processing volumes ...");
+let processDate = moment(process.argv[2], "YYYY-MM-DD", true);
+log.green("Processing volumes for", processDate.toDate(), "...");
+
 tradeIO.tickers().then(async function (tickers){
     const formattedTickers = trading_utils.formatTickers(tickers.tickers);
  
@@ -29,7 +31,7 @@ tradeIO.tickers().then(async function (tickers){
             if (tickerTrades.data.length != 0){
                 for(const trade of tickerTrades.data){
                     let date = moment(trade.createdAt, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ");
-                    if(moment().dayOfYear() == date.dayOfYear() && trade.status ==="Completed"){
+                    if(processDate.dayOfYear() == date.dayOfYear() && trade.status ==="Completed"){
                         tradeNb++;
                         tickerVolume += parseFloat(trade.total);
                         switch (baseAsset) {
