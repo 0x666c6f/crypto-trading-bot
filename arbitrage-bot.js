@@ -32,7 +32,7 @@ var start = async function (infos) {
         // log("Daily Order Weight :", totalDailyOrderWeight)
         while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3) && moment().isBefore(endHourDate)) {
             var endMinuteDate = moment().add(1, "minute");
-            var endSecond = moment().set("second", process.env.EndSecond);
+            var endSecond = moment().set("second", process.env.EndSecond).milliseconds(0);
             // log("Hourly Weights :")
             // log("Hourly Weight :", totalHourlyWeight)
             // log("Hourly Order Weight :", totalHourlyOrderWeight)
@@ -102,7 +102,7 @@ var initArbitrage = async function (infos) {
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers);
-        let sleepTime = moment().add(2,"minute").set("second",process.env.StartSecond).diff(moment());
+        let sleepTime = moment().add(2,"minute").set("second",process.env.StartSecond).milliseconds(0).diff(moment());
         log.error("Going to sleep for a while to reset limit :", sleepTime);
         sleep.msleep(sleepTime);
         log.error("Nap is over, getting back to work !");
