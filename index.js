@@ -12,8 +12,7 @@ log.green("/////////////////////////////////////////////");
 
 require('./config.js');
 
-let start = moment().add(1,"minute");
-start.set("second", process.env.StartSecond);
+let start = moment().add(1,"minute").seconds(process.env.StartSecond).milliseconds(0);
 
 log.green("Arbitrage bot starting date is set at :", start.toDate());
 
@@ -37,8 +36,5 @@ const job = new CronJob(start, function() {
     });
 });
 job.start();
-    
-    
-
     
 
