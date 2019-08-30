@@ -33,6 +33,7 @@ var start = async function (infos) {
         while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3) && moment().isBefore(endHourDate)) {
             var endMinuteDate = moment().add(1, "minute").set("second", process.env.EndSecond).milliseconds(0);
             var endSecond = moment().set("second", process.env.EndSecond).milliseconds(0);
+            var restartDate = moment().set("second", process.env.StartSecond).milliseconds(0);
             // log("Hourly Weights :")
             // log("Hourly Weight :", totalHourlyWeight)
             // log("Hourly Order Weight :", totalHourlyOrderWeight)
@@ -59,8 +60,8 @@ var start = async function (infos) {
             totalMinuteWeight = 0;
             totalMinuteOrderWeight = 0;
             let now = moment();
-            if (now.isBefore(endMinuteDate)) {
-                let ms = endMinuteDate.diff(now, 'milliseconds');
+            if (now.isBefore(restartDate)) {
+                let ms = restartDate.diff(now, 'milliseconds');
                 log("Will sleep", ms, "to reset minute weight");
                 sleep.msleep(ms);
                 log("Waking up, sleep is over !");
