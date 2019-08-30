@@ -25,13 +25,13 @@ var start = async function (infos) {
     var endDayDate = moment().add(1, "day");
     log("Starting Arbitrage");
     while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3) && moment().isBefore(endDayDate)) {
-        var endHourDate = moment().add(1, "hour");
+        var endHourDate = moment().add(1, "hour").set("second", process.env.EndSecond).milliseconds(0);
 
         // log("Daily Weights :")
         // log("Daily Weight :", totalDailyWeight)
         // log("Daily Order Weight :", totalDailyOrderWeight)
         while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3) && moment().isBefore(endHourDate)) {
-            var endMinuteDate = moment().add(1, "minute");
+            var endMinuteDate = moment().add(1, "minute").set("second", process.env.EndSecond).milliseconds(0);
             var endSecond = moment().set("second", process.env.EndSecond).milliseconds(0);
             // log("Hourly Weights :")
             // log("Hourly Weight :", totalHourlyWeight)
