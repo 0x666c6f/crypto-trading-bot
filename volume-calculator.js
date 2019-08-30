@@ -31,18 +31,18 @@ tradeIO.tickers().then(async function (tickers){
             if (tickerTrades.data.length != 0){
                 for(const trade of tickerTrades.data){
                     let date = moment(trade.createdAt, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ");
-                    if(processDate.dayOfYear() == date.dayOfYear() && trade.status ==="Completed"){
+                    if(processDate.dayOfYear() == date.dayOfYear()){
                         tradeNb++;
-                        tickerVolume += parseFloat(trade.total);
+                        tickerVolume += parseFloat(trade.quoteAmount);
                         switch (baseAsset) {
                             case "eth":
-                                ethVol += parseFloat(trade.total);
+                                ethVol += parseFloat(trade.quoteAmount);
                                 break;
                             case "btc":
-                                btcVol += parseFloat(trade.total);
+                                btcVol += parseFloat(trade.quoteAmount);
                                 break;
                             case "usdt":
-                                usdtVol += parseFloat(trade.total);
+                                usdtVol += parseFloat(trade.quoteAmount);
                                 break;
                             default:
                                 break;
