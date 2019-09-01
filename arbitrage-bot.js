@@ -2,6 +2,7 @@ var tradeIO = require('./tradeio');
 var tradingUtils = require('./trading-utils');
 const log = require('./logger').logger;
 var sleep = require('sleep');
+const async = require('async');
 const BigNumber = require('bignumber.js');
 BigNumber.config({
     ROUNDING_MODE: 1
@@ -18,7 +19,7 @@ var start = async function (infos) {
     var endMinuteDate = new Date();
     endMinuteDate.setSeconds(process.env.EndSecond);
     endMinuteDate.setMilliseconds(0);
-    
+
     var restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + 1);
     restartDate.setSeconds(process.env.StartSecond);
@@ -84,12 +85,53 @@ var initArbitrage = async function (infos) {
 
     let symbols = formattedTickers.get("symbols");
     for (const ticker of symbols) {
-        //log(">>> Checking arbitrages for symbol", "<" + ticker + ">")
-        await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
-        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
-        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
-        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
-        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
+        //log(">>> Checking arbitrages for symbol", "<" + ticker + ">");
+
+        async.parallel([
+                function (callback) {
+                    manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
+                    callback(null, 1);
+                },
+                function (callback) {
+                    manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
+                    callback(null, 1);
+                },
+            ],
+            function (err, results) {
+
+            });
+
+        async.parallel([
+                function (callback) {
+                    manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
+                    callback(null, 1);
+                },
+                function (callback) {
+                    manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt");
+                    callback(null, 1);
+                },
+            ],
+            function (err, results) {
+
+            });
+        async.parallel([
+                function (callback) {
+                    manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
+                    callback(null, 1);
+                },
+                function (callback) {
+                    manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
+                    callback(null, 1);
+                }
+            ],
+            function (err, results) {
+
+            });
+        // await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
+        // await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
+        // await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
+        // await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
+        // await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
     }
 };
 
@@ -98,6 +140,7 @@ var initArbitrage = async function (infos) {
 ///////// btc->XXX->eth->btc //////////
 ////////////////////////////////////////////
 var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
+    //log("Checking arbitrage : <btc->" + symbol + "->eth->btc>");
     let tickerBTC = tickers.get(symbol + "_btc");
     let tickerETH = tickers.get(symbol + "_eth");
     let tickerEthBtc = tickers.get("eth_btc");
@@ -108,6 +151,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
         tickerETH.bidPrice > 0) {
         //log("Tickers exists for " + symbol)
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice;
+
         if (bonus > process.env.MinProfit) {
             if (tickerBTC.askPrice * tickerBTC.askQty > process.env.MinBTC && tickerETH.bidQty * tickerETH.bidPrice > process.env.MinETH && tickerETH.bidPrice * tickerETH.bidQty * valBtcEth > process.env.MinBTC) {
                 log("\t<btc->" + symbol + "->eth->btc>", "| " + symbol + " bonus = " + bonus);
@@ -217,7 +261,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 /////// usdt->XXX->btc->usdt //////////
 ////////////////////////////////////////////
 var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, symbol, intermediate) {
-    //log("Checking arbitrage : <usdt->" + symbol + "->" + intermediate + "->usdt>")
+    //log("Checking arbitrage : <usdt->" + symbol + "->" + intermediate + "->usdt>");
 
     let tickerUSDT = tickers.get(symbol + "_usdt");
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate);
@@ -350,7 +394,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
 ///////  btc->XXX->usdt->btc //////////
 ////////////////////////////////////////////
 var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos, symbol, source, intermediate) {
-    //log("Checking arbitrage : <" + source + "->" + symbol + "->" + intermediate + "->" + source + ">")
+    //log("Checking arbitrage : <" + source + "->" + symbol + "->" + intermediate + "->" + source + ">");
 
     let tickerSource = tickers.get(symbol + "_" + source);
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate);
