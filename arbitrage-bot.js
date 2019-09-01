@@ -4,6 +4,8 @@ const log = require('./logger').logger;
 var sleep = require('sleep');
 const async = require('async');
 const BigNumber = require('bignumber.js');
+const moment = require("moment");
+
 BigNumber.config({
     ROUNDING_MODE: 1
 });
