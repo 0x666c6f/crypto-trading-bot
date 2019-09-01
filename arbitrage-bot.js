@@ -182,7 +182,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                 } else {
                     log.error("First trade has failed for arbitrage <btc->" + symbol + "->eth->btc> :", orderA);
-                    if (orderA.order && orderA.order.status == "Working") {
+                    if (orderA.order && orderA.order.status == "Working" && orderA.order.unitsFilled <= 0) {
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
 
@@ -311,7 +311,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     }
                 } else {
                     log.error("First trade has failed for arbitrage <usdt->" + symbol + "->" + intermediate + "->usdt> :", orderA);
-                    if (orderA.order && orderA.order.status == "Working") {
+                    if (orderA.order && orderA.order.status == "Working" && orderA.order.unitsFilled <= 0) {
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
 
@@ -467,7 +467,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     }
                 } else {
                     log.error("First trade has failed for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", orderA);
-                    if (orderA.order && orderA.order.status == "Working") {
+                    if (orderA.order && orderA.order.status == "Working" && orderA.order.unitsFilled <= 0) {
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
 
