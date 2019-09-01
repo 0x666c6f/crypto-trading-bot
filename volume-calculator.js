@@ -70,9 +70,9 @@ tradeIO.tickers().then(async function (tickers){
         log.red(key.toUpperCase()+" volume = ", value);
     }
 
-    log.green("\tTotal btc :", btcVol);
-    log.green("\tTotal eth :", ethVol);
-    log.green("\tTotal usdt :", usdtVol);
+    log.green("\tTotal BTC :", btcVol);
+    log.green("\tTotal ETH :", ethVol);
+    log.green("\tTotal USDT :", usdtVol);
     log.green("\tTotal daily trades :", tradeNb);
     log.green("\tTotal daily arbitrages :", tradeNb/3);
     log.green("\tTotal daily :", usdtVol + valEth*ethVol + valBTC*btcVol);
