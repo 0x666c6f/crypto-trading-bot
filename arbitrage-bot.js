@@ -171,14 +171,14 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                 if (process.env.Debug == true)
                     log.green("Initiating order for symbol " + symbol);
 
-                totalDailyWeight++;
-                totalDailyOrderWeight++;
+                
+                
 
                 totalMinuteWeight++;
                 totalMinuteOrderWeight++;
 
-                totalHourlyWeight++;
-                totalHourlyOrderWeight++;
+                
+                
 
                 let orderA = await tradeIO.newOrder(symbol + "_btc", "buy", "limit", qty, price);
 
@@ -190,14 +190,8 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                     qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(infos.get(symbol + "_eth").baseAssetPrecision).toNumber();
 
-                    totalDailyWeight++;
-                    totalDailyOrderWeight++;
-
                     totalMinuteWeight++;
                     totalMinuteOrderWeight++;
-
-                    totalHourlyWeight++;
-                    totalHourlyOrderWeight++;
 
                     let orderB = await tradeIO.newOrder(symbol + "_eth", "sell", "limit", qty, price);
 
@@ -209,14 +203,14 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                         qty = new BigNumber(orderB.order.total - orderB.order.commission).decimalPlaces(infos.get("eth_btc").baseAssetPrecision).toNumber();
 
-                        totalDailyWeight++;
-                        totalDailyOrderWeight++;
+                        
+                        
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
 
-                        totalHourlyWeight++;
-                        totalHourlyOrderWeight++;
+                        
+                        
 
                         let orderC = await tradeIO.newOrder("eth_btc", "sell", "limit", qty, price);
 
@@ -238,14 +232,14 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                     if (process.env.Debug == true)
                         log.error("First trade has failed for arbitrage <btc->" + symbol + "->eth->btc> :", orderA);
                     if (orderA.order && orderA.order.status == "Working" && orderA.order.unitsFilled <= 0) {
-                        totalDailyWeight++;
-                        totalDailyOrderWeight++;
+                        
+                        
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
 
-                        totalHourlyWeight++;
-                        totalHourlyOrderWeight++;
+                        
+                        
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
                             if (resp.code === 0) {
                                 if (process.env.Debug == true)
@@ -321,14 +315,14 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                 if (process.env.Debug == true)
                     log("Initiating order for symbol " + symbol);
 
-                totalDailyWeight++;
-                totalDailyOrderWeight++;
+                
+                
 
                 totalMinuteWeight++;
                 totalMinuteOrderWeight++;
 
-                totalHourlyWeight++;
-                totalHourlyOrderWeight++;
+                
+                
 
                 let orderA = await tradeIO.newOrder(symbol + "_usdt", "buy", "limit", qty, price);
 
@@ -339,14 +333,14 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     let price = tickerIntermediate.bidPrice;
                     qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
 
-                    totalDailyWeight++;
-                    totalDailyOrderWeight++;
+                    
+                    
 
                     totalMinuteWeight++;
                     totalMinuteOrderWeight++;
 
-                    totalHourlyWeight++;
-                    totalHourlyOrderWeight++;
+                    
+                    
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
 
@@ -356,14 +350,14 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         price = tickerIntermediateUSDT.bidPrice;
                         qty = new BigNumber(orderB.order.total - orderB.order.commission).decimalPlaces(infos.get(intermediate + "_usdt").baseAssetPrecision).toNumber();
 
-                        totalDailyWeight++;
-                        totalDailyOrderWeight++;
+                        
+                        
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
 
-                        totalHourlyWeight++;
-                        totalHourlyOrderWeight++;
+                        
+                        
 
                         let orderC = await tradeIO.newOrder(intermediate + "_usdt", "sell", "limit", qty, price);
 
@@ -382,14 +376,14 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     if (process.env.Debug == true)
                         log.error("First trade has failed for arbitrage <usdt->" + symbol + "->" + intermediate + "->usdt> :", orderA);
                     if (orderA.order && orderA.order.status == "Working" && orderA.order.unitsFilled <= 0) {
-                        totalDailyWeight++;
-                        totalDailyOrderWeight++;
+                        
+                        
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
 
-                        totalHourlyWeight++;
-                        totalHourlyOrderWeight++;
+                        
+                        
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
                             if (resp.code === 0) {
                                 if (process.env.Debug == true)
@@ -490,14 +484,14 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                 if (process.env.Debug == true)
                     log.green("Initiating order for symbol " + symbol);
 
-                totalDailyWeight++;
-                totalDailyOrderWeight++;
+                
+                
 
                 totalMinuteWeight++;
                 totalMinuteOrderWeight++;
 
-                totalHourlyWeight++;
-                totalHourlyOrderWeight++;
+                
+                
 
                 let orderA = await tradeIO.newOrder(symbol + "_" + source, "buy", "limit", qty, price);
 
@@ -509,14 +503,14 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     let price = tickerIntermediate.bidPrice;
                     qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
 
-                    totalDailyWeight++;
-                    totalDailyOrderWeight++;
+                    
+                    
 
                     totalMinuteWeight++;
                     totalMinuteOrderWeight++;
 
-                    totalHourlyWeight++;
-                    totalHourlyOrderWeight++;
+                    
+                    
 
                     let orderB = await tradeIO.newOrder(symbol + "_" + intermediate, "sell", "limit", qty, price);
 
@@ -527,14 +521,14 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         price = tickerSourceIntermediate.askPrice;
                         qty = new BigNumber((orderB.order.total - orderB.order.commission) / price).decimalPlaces(infos.get(source + "_" + intermediate).baseAssetPrecision).toNumber();
 
-                        totalDailyWeight++;
-                        totalDailyOrderWeight++;
+                        
+                        
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
 
-                        totalHourlyWeight++;
-                        totalHourlyOrderWeight++;
+                        
+                        
 
                         let orderC = await tradeIO.newOrder(source + "_" + intermediate, "buy", "limit", qty, price);
 
@@ -554,14 +548,14 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     if (process.env.Debug == true)
                         log.error("First trade has failed for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", orderA);
                     if (orderA.order && orderA.order.status == "Working" && orderA.order.unitsFilled <= 0) {
-                        totalDailyWeight++;
-                        totalDailyOrderWeight++;
+                        
+                        
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
 
-                        totalHourlyWeight++;
-                        totalHourlyOrderWeight++;
+                        
+                        
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
                             if (resp.code === 0) {
                                 if (process.env.Debug == true)
