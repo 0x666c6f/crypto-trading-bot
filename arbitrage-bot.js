@@ -16,6 +16,7 @@ var totalMinuteOrderWeight = 0;
 var valBTC = null;
 var valBtcEth = null;
 var valETH = null;
+var formattedTickers = tradingUtils.formatTickers(tickers.tickers);
 
 var start = async function (infos) {
     var endMinuteDate = new Date();
@@ -58,7 +59,7 @@ var start = async function (infos) {
         log("Waking up, sleep is over !");
     }
 
-    start();
+    start(infos);
 };
 
 
@@ -80,7 +81,6 @@ var initArbitrage = async function (infos) {
     }
     totalMinuteWeight += 20;
 
-    let formattedTickers = tradingUtils.formatTickers(tickers.tickers);
     valBTC = formattedTickers.get('btc_usdt').askPrice;
     valBtcEth = formattedTickers.get('eth_btc').askPrice;
     valETH = formattedTickers.get('eth_usdt').askPrice;
