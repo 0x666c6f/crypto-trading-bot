@@ -2,93 +2,59 @@ var tradeIO = require('./tradeio');
 var tradingUtils = require('./trading-utils');
 const log = require('./logger').logger;
 var sleep = require('sleep');
-const moment = require("moment");
 const BigNumber = require('bignumber.js');
 BigNumber.config({
     ROUNDING_MODE: 1
 });
 
-var totalDailyWeight = 0;
-var totalDailyOrderWeight = 0;
-
 var totalMinuteWeight = 0;
 var totalMinuteOrderWeight = 0;
-
-var totalHourlyWeight = 0;
-var totalHourlyOrderWeight = 0;
 
 var valBTC = null;
 var valBtcEth = null;
 var valETH = null;
 
 var start = async function (infos) {
-    var endDayDate = moment().add(1, "day");
+    var endMinuteDate = new Date();
+    endMinuteDate.setSeconds(process.env.EndSecond);
+    endMinuteDate.setMilliseconds(0);
+    
+    var restartDate = new Date();
+    restartDate.setMinutes(restartDate.getMinutes() + 1);
+    restartDate.setSeconds(process.env.StartSecond);
+    restartDate.setMilliseconds(0);
+
     log("Starting Arbitrage");
-    while (totalDailyWeight < (process.env.APIDailyLimit - 23) && (totalDailyOrderWeight < process.env.OrderDailyLimit - 3) && moment().isBefore(endDayDate)) {
-        var endHourDate = moment().add(1, "hour").set("second", process.env.EndSecond).milliseconds(0);
 
-        // log("Daily Weights :")
-        // log("Daily Weight :", totalDailyWeight)
-        // log("Daily Order Weight :", totalDailyOrderWeight)
-        while (totalHourlyWeight < (process.env.APIHourlyLimit - 23) && (totalHourlyOrderWeight < process.env.OrderHourlyLimit - 3) && moment().isBefore(endHourDate)) {
-            var endMinuteDate = moment().add(1, "minute").set("second", process.env.EndSecond).milliseconds(0);
-            var endSecond = moment().set("second", process.env.EndSecond).milliseconds(0);
-            var restartDate = moment().add(1, "minute").set("second", process.env.StartSecond).milliseconds(0);
-            // log("Hourly Weights :")
-            // log("Hourly Weight :", totalHourlyWeight)
-            // log("Hourly Order Weight :", totalHourlyOrderWeight)
-            while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && moment().isBefore(endMinuteDate) && moment().isBefore(endSecond)) {
-                await initArbitrage(infos);
-                if (process.env.Timeout != 0)
-                    sleep.msleep(process.env.Timeout);
-                //log("Arbitrages finished")
-                // log("Minute Weights :")
-                // log("Minute Weight :", totalMinuteWeight)
-                // log("Minute Order Weight :", totalMinuteOrderWeight)
-            }
-
-            //update bot max balance data
-            //Temp as long as we don't have enough liquidity
-            log.green("Updating balances");
-            let balances = await tradeIO.account();
-            if(balances.size > 0){
-                process.env.MaxBTC = balances.get("btc");
-                process.env.MaxUSDT = balances.get("usdt");
-                process.env.MaxETH = balances.get("eth");
-            }
-
-            totalMinuteWeight = 0;
-            totalMinuteOrderWeight = 0;
-            let now = moment();
-            if (now.isBefore(restartDate)) {
-                let ms = restartDate.diff(now, 'milliseconds');
-                log("Will sleep", ms, "to reset minute weight");
-                sleep.msleep(ms);
-                log("Waking up, sleep is over !");
-            }
-        }
-        totalHourlyWeight = 0;
-        totalHourlyOrderWeight = 0;
-        let now = moment();
-        if (now.isBefore(endHourDate)) {
-            let ms = endHourDate.diff(now, 'milliseconds');
-
-            log("Will sleep", ms, "to reset hour weight");
-            sleep.msleep(ms);
-            log("Waking up, sleep is over !");
-
-        }
+    while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && Date.now() < endMinuteDate.getTime()) {
+        await initArbitrage(infos);
+        if (process.env.Timeout != 0)
+            sleep.msleep(process.env.Timeout);
+        //log("Arbitrages finished")
+        // log("Minute Weights :")
+        // log("Minute Weight :", totalMinuteWeight)
+        // log("Minute Order Weight :", totalMinuteOrderWeight)
     }
-    totalDailyWeight = 0;
-    totalDailyOrderWeight = 0;
-    let now = moment();
-    if (now.isBefore(endDayDate)) {
-        let ms = endDayDate.diff(now, 'milliseconds');
-        log("Will sleep", ms, "to reset day weight");
+
+    //update bot max balance data
+    //Temp as long as we don't have enough liquidity
+    log.green("Updating balances");
+    let balances = await tradeIO.account();
+    if (balances.size > 0) {
+        process.env.MaxBTC = balances.get("btc");
+        process.env.MaxUSDT = balances.get("usdt");
+        process.env.MaxETH = balances.get("eth");
+    }
+
+    totalMinuteWeight = 0;
+    totalMinuteOrderWeight = 0;
+    if (Date.now() < restartDate.getTime()) {
+        let ms = restartDate.getTime() - Date.now();
+        log("Will sleep", ms, "to reset minute weight");
         sleep.msleep(ms);
         log("Waking up, sleep is over !");
-
     }
+
     start();
 };
 
@@ -103,15 +69,13 @@ var initArbitrage = async function (infos) {
     let tickers = await tradeIO.tickers();
     if (tickers.code != 0) {
         log.error("Error while retrieving tickers: ", tickers);
-        let sleepTime = moment().add(2,"minute").seconds(process.env.StartSecond).milliseconds(0).diff(moment());
+        let sleepTime = moment().add(2, "minute").seconds(process.env.StartSecond).milliseconds(0).diff(moment());
         log.error("Going to sleep for a while to reset limit :", sleepTime);
         sleep.msleep(sleepTime);
         log.error("Nap is over, getting back to work !");
         return;
     }
-    totalDailyWeight += 20;
     totalMinuteWeight += 20;
-    totalHourlyWeight += 20;
 
     let formattedTickers = tradingUtils.formatTickers(tickers.tickers);
     valBTC = formattedTickers.get('btc_usdt').askPrice;
@@ -218,7 +182,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                 } else {
                     log.error("First trade has failed for arbitrage <btc->" + symbol + "->eth->btc> :", orderA);
-                    if(orderA.order && orderA.order.status == "Working"){
+                    if (orderA.order && orderA.order.status == "Working") {
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
 
@@ -228,7 +192,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
-                            if(resp.code === 0){ 
+                            if (resp.code === 0) {
                                 log.warn("First trade has been canceled for arbitrage <btc->" + symbol + "->eth->btc> :", resp);
                             } else {
                                 log.warn("Error while cancelling first trade for arbitrage <btc->" + symbol + "->eth->btc> :", resp);
@@ -347,7 +311,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                     }
                 } else {
                     log.error("First trade has failed for arbitrage <usdt->" + symbol + "->" + intermediate + "->usdt> :", orderA);
-                    if(orderA.order && orderA.order.status == "Working"){
+                    if (orderA.order && orderA.order.status == "Working") {
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
 
@@ -357,7 +321,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
-                            if(resp.code === 0){ 
+                            if (resp.code === 0) {
                                 log.warn("First trade has been canceled for arbitrage <usdt->" + symbol + "->" + intermediate + "-> usdt> :", resp);
                             } else {
                                 log.warn("Error while cancelling first trade for arbitrage <usdt->" + symbol + "->" + intermediate + "->usdt> :", resp);
@@ -503,7 +467,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                     }
                 } else {
                     log.error("First trade has failed for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", orderA);
-                    if(orderA.order && orderA.order.status == "Working"){
+                    if (orderA.order && orderA.order.status == "Working") {
                         totalDailyWeight++;
                         totalDailyOrderWeight++;
 
@@ -513,7 +477,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         totalHourlyWeight++;
                         totalHourlyOrderWeight++;
                         await tradeIO.cancelOrder(orderA.order.orderId).then(function (resp) {
-                            if(resp.code === 0){ 
+                            if (resp.code === 0) {
                                 log.warn("First trade has been canceled for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", resp);
                             } else {
                                 log.warn("Error while cancelling first trade for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", resp);
