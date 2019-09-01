@@ -29,6 +29,7 @@ try {
     process.env.APIMinuteLimit = doc.config.APIMinuteLimit;
     process.env.APIHourlyLimit = doc.config.APIHourlyLimit;
     process.env.APIDailyLimit = doc.config.APIDailyLimit;
+    process.env.Debug = doc.config.Debug;
     if(process.env.StartSecond == undefined)
       process.env.StartSecond = doc.config.StartSecond;
     if(process.env.EndSecond == undefined)

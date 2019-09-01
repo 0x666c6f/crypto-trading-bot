@@ -149,7 +149,7 @@ var tickers = function (symbol) {
 };
 
 var newOrder = function (symbol, side, type, quantity, price, stopPrice) {
-    log("TradeIO New Order Request");
+    //log("TradeIO New Order Request");
     return new Promise((resolve, reject) => {
         var ts = new Date().getTime();
 
@@ -166,16 +166,16 @@ var newOrder = function (symbol, side, type, quantity, price, stopPrice) {
         if (stopPrice)
             order.StopPrice = stopPrice;
 
-        log("\t Order :", JSON.stringify(order, null, 2));
+        //log("\t Order :", JSON.stringify(order, null, 2));
 
         http.post(process.env.APIEndpoint + "/api/v1/order", order).then(function (resp) {
-            log("New Order request successfull");
+            //log("New Order request successfull");
             resolve(resp);
         }, function (error) {
-            log.red("Error while doing New order request = " + JSON.stringify(error, null, 2));
+            //log.red("Error while doing New order request = " + JSON.stringify(error, null, 2));
             reject(error);
         }).catch(function (err) {
-            log.red("Error while doing New order request = " + JSON.stringify(err, null, 2));
+            //log.red("Error while doing New order request = " + JSON.stringify(err, null, 2));
             reject(err);
         });
     });

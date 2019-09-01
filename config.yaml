@@ -21,6 +21,7 @@ config:
   LogLevel: INFO
   StartSecond: 0
   EndSecond: 5
+  Debug: true
   Exclusions:
     - ktos
     - btnt
