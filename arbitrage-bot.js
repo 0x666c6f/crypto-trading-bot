@@ -86,12 +86,9 @@ var initArbitrage = async function (infos) {
 
     let symbols = formattedTickers.get("symbols");
     for (const ticker of symbols) {
-        await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
-        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
-        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
-        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
-        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt");
-        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
+        await Promise.all([manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc"),manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)]);
+        await Promise.all([manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc"),manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt")]);
+        await Promise.all([manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt"),manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth")]);
     }
 };
 
