@@ -94,46 +94,12 @@ var initArbitrage = async function (infos) {
         if (process.env.Debug == "true")
             log(">>> Checking arbitrages for symbol", "<" + ticker + ">");
 
-        await async.parallel([
-                async function (callback) {
-                        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
-                        callback(null, 1);
-                    },
-                    async function (callback) {
-                        await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
-                        callback(null, 1);
-                    },
-            ],
-            async function (err, results) {
-                await async.parallel([
-                        async function (callback) {
-                                await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
-                                callback(null, 1);
-                            },
-                            async function (callback) {
-                                await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt");
-                                callback(null, 1);
-                            },
-                    ],
-                    async function (err, results) {
-                        await async.parallel([
-                                async function (callback) {
-                                        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
-                                        callback(null, 1);
-                                    },
-                                    async function (callback) {
-                                        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
-                                        callback(null, 1);
-                                    }
-                            ],
-                            function (err, results) {
-
-                            });
-                    });
-            });
-
-
-
+            await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
+            await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
+            await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
+            await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
+            await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt");
+            await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
     }
 };
 
