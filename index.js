@@ -1,7 +1,7 @@
-var tradeio = require('./tradeio');
-var arbitrageBot = require('./arbitrage-bot');
-var trading_utils = require('./trading-utils');
-var log = require("./logger").logger;
+var tradeio = require('./lib/tradeio');
+var arbitrageBot = require('./lib/arbitrage-bot');
+var trading_utils = require('./lib/trading-utils');
+var log = require("./logger/logger").logger;
 var CronJob = require('cron').CronJob;
 const moment = require("moment");
 
@@ -10,7 +10,7 @@ log.green("///// Starting Trade IO Arbitrageg BOT /////");
 log.green("/////////////////////////////////////////////");
 
 
-require('./config.js');
+require('./config/config.js');
 
 let start = moment().add(1,"minute").seconds(process.env.StartSecond).milliseconds(0);
 

@@ -1,9 +1,10 @@
 const yaml = require('js-yaml');
 const fs   = require('fs');
-var log = require("./logger").logger;
+var log = require("../logger/logger").logger;
 
 const ansi = require('ansicolor').nice;
 log("Loading config from file");
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 try {
   var doc = yaml.safeLoad(fs.readFileSync(__dirname+'/config.yaml', 'utf8'));

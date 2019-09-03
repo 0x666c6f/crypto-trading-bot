@@ -1,7 +1,7 @@
-require('./config.js');
-const trading_utils = require('./trading-utils');
-var log = require("./logger").logger;
-var tradeIO = require('./tradeio');
+require('../config/config.js/index.js');
+const trading_utils = require('../lib/trading-utils');
+var log = require("../logger/logger").logger;
+var tradeIO = require('../lib/tradeio');
 const moment = require("moment");
 
 const volumes = new Map();
