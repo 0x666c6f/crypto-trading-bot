@@ -2,10 +2,8 @@ var tradeIO = require('./tradeio');
 var tradingUtils = require('./trading-utils');
 const log = require('./logger').logger;
 var sleep = require('sleep');
-const async = require('async');
 const BigNumber = require('bignumber.js');
 const moment = require("moment");
-const Promise = require("bluebird");
 
 BigNumber.config({
     ROUNDING_MODE: 1
@@ -87,16 +85,12 @@ var initArbitrage = async function (infos) {
 
     let symbols = formattedTickers.get("symbols");
     for (const ticker of symbols) {
-
-        await Promise.all([manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc"),manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker)]);
-        await Promise.all([manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc"),manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt")]);
-        await Promise.all([manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt"),manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth")]);
-        // await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
-        // await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
-        // await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
-        // await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt");
-        // await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
-        // await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
+        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
+        await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
+        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
+        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "btc", "usdt");
+        await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "usdt");
+        await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "eth");
     }
 };
 
