@@ -1,7 +1,7 @@
-var log = require("./logger").logger;
-var http = require('./http-manager');
+var log = require("../logger/logger").logger;
+var http = require('../lib/http-manager');
 
-require('./config.js');
+require('../config/config.js');
 
 var tickers = function (symbol) {
     log("TradeIO Tickers Request")
