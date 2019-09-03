@@ -5,6 +5,7 @@ var sleep = require('sleep');
 const async = require('async');
 const BigNumber = require('bignumber.js');
 const moment = require("moment");
+const Promise = require("bluebird");
 
 BigNumber.config({
     ROUNDING_MODE: 1
