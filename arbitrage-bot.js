@@ -81,8 +81,7 @@ var initArbitrage = async function (infos) {
 
     let symbols = formattedTickers.get("symbols");
     const symbolLength = symbols.length;
-    for (let index = 0; index < symbolLength; index ++)
-    {
+    for (let index = 0; index < symbolLength; index++) {
         const ticker = symbols[index];
         await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
         await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
@@ -101,15 +100,15 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
     const tickerBTC = tickers.get(symbol + "_btc");
     const tickerETH = tickers.get(symbol + "_eth");
     const tickerEthBtc = tickers.get("eth_btc");
-    const precBTC = infos.get(symbol + "_btc").baseAssetPrecision;
-    const precETH = infos.get(symbol + "_eth").baseAssetPrecision;
-    const precETHBTC = infos.get("eth_btc").baseAssetPrecision;
 
     if (tickerETH &&
         tickerBTC &&
         tickerBTC.askPrice > 0 &&
         tickerETH.bidPrice > 0) {
 
+        const precBTC = infos.get(symbol + "_btc").baseAssetPrecision;
+        const precETH = infos.get(symbol + "_eth").baseAssetPrecision;
+        const precETHBTC = infos.get("eth_btc").baseAssetPrecision;
         let bonus = tickerETH.bidPrice * tickerEthBtc.bidPrice / tickerBTC.askPrice;
 
         if (bonus > process.env.MinProfit) {
@@ -191,7 +190,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
                         });
                     }
                 }
-            } 
+            }
         }
     }
 };
@@ -206,14 +205,15 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
     let tickerUSDT = tickers.get(symbol + "_usdt");
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate);
     let tickerIntermediateUSDT = tickers.get(intermediate + "_usdt");
-    const precUSDT = infos.get(symbol + "_usdt").baseAssetPrecision;
-    const precIntermediate = infos.get(symbol + "_" + intermediate).baseAssetPrecision;
-    const precIntermediateUSDT  = infos.get(intermediate + "_usdt").baseAssetPrecision;
 
     if (tickerUSDT &&
         tickerIntermediate &&
         tickerUSDT.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
+
+        const precUSDT = infos.get(symbol + "_usdt").baseAssetPrecision;
+        const precIntermediate = infos.get(symbol + "_" + intermediate).baseAssetPrecision;
+        const precIntermediateUSDT = infos.get(intermediate + "_usdt").baseAssetPrecision;
 
         let bonus = tickerIntermediateUSDT.bidPrice * tickerIntermediate.bidPrice / tickerUSDT.askPrice;
 
@@ -300,7 +300,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         });
                     }
                 }
-            } 
+            }
         }
     }
 
@@ -320,15 +320,17 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
     let tickerSource = tickers.get(symbol + "_" + source);
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate);
     let tickerSourceIntermediate = tickers.get(source + "_" + intermediate);
-    const precSource = infos.get(symbol + "_" + source).baseAssetPrecision;
-    const precIntermediate = infos.get(symbol + "_" + intermediate).baseAssetPrecision;
-    const precSourceIntermediate  = infos.get(source + "_" + intermediate).baseAssetPrecision;
+
 
     if (tickerSource &&
         tickerIntermediate &&
         tickerSource.askPrice > 0 &&
         tickerIntermediate.bidPrice > 0) {
 
+        const precSource = infos.get(symbol + "_" + source).baseAssetPrecision;
+        const precIntermediate = infos.get(symbol + "_" + intermediate).baseAssetPrecision;
+        const precSourceIntermediate = infos.get(source + "_" + intermediate).baseAssetPrecision;
+        
         let bonus = tickerIntermediate.bidPrice / tickerSource.askPrice / tickerSourceIntermediate.askPrice;
 
         if (bonus > process.env.MinProfit) {
@@ -435,7 +437,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         });
                     }
                 }
-            } 
+            }
         }
     }
 };
