@@ -17,10 +17,6 @@ var valBtcEth = null;
 var valETH = null;
 
 var start = async function (infos) {
-    var endMinuteDate = new Date();
-    endMinuteDate.setSeconds(process.env.EndSecond);
-    endMinuteDate.setMilliseconds(0);
-
     var restartDate = new Date();
     restartDate.setMinutes(restartDate.getMinutes() + 1);
     restartDate.setSeconds(process.env.StartSecond);
@@ -28,7 +24,7 @@ var start = async function (infos) {
 
     log("Starting Arbitrage");
 
-    while (totalMinuteWeight < (process.env.APIMinuteLimit - 23) && (totalMinuteOrderWeight < process.env.OrderMinuteLimit - 3) && Date.now() < endMinuteDate.getTime()) {
+    while (totalMinuteWeight < (process.env.APIMinuteLimit - 23)) {
         await initArbitrage(infos);
         if (process.env.Timeout != 0)
             sleep.msleep(process.env.Timeout);
@@ -84,7 +80,10 @@ var initArbitrage = async function (infos) {
     valETH = formattedTickers.get('eth_usdt').askPrice;
 
     let symbols = formattedTickers.get("symbols");
-    for (const ticker of symbols) {
+    const symbolLength = symbols.length;
+    for (let index = 0; index < symbolLength; index ++)
+    {
+        const ticker = symbols[index];
         await manageArbitrageUSDT_X_Intermediate_USDT(formattedTickers, infos, ticker, "btc");
         await manageArbitrageBTCtoXtoETHtoBTC(formattedTickers, infos, ticker);
         await manageArbitrageSource_X_Intermediate_Source(formattedTickers, infos, ticker, "eth", "btc");
@@ -99,9 +98,12 @@ var initArbitrage = async function (infos) {
 ///////// btc->XXX->eth->btc //////////
 ////////////////////////////////////////////
 var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
-    let tickerBTC = tickers.get(symbol + "_btc");
-    let tickerETH = tickers.get(symbol + "_eth");
-    let tickerEthBtc = tickers.get("eth_btc");
+    const tickerBTC = tickers.get(symbol + "_btc");
+    const tickerETH = tickers.get(symbol + "_eth");
+    const tickerEthBtc = tickers.get("eth_btc");
+    const precBTC = infos.get(symbol + "_btc").baseAssetPrecision;
+    const precETH = infos.get(symbol + "_eth").baseAssetPrecision;
+    const precETHBTC = infos.get("eth_btc").baseAssetPrecision;
 
     if (tickerETH &&
         tickerBTC &&
@@ -121,9 +123,9 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                 let price = tickerBTC.askPrice;
 
-                var qty = Math.min(process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty);
-                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_btc").baseAssetPrecision).toNumber();
-                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_eth").baseAssetPrecision).toNumber();
+                var qty = tradingUtils.getMin([process.env.MaxBTC / price, tickerBTC.askQty, tickerETH.bidQty]);
+                qty = new BigNumber(qty).decimalPlaces(precBTC).toNumber();
+                qty = new BigNumber(qty).decimalPlaces(precETH).toNumber();
 
                 totalMinuteWeight++;
                 totalMinuteOrderWeight++;
@@ -136,7 +138,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                     let price = tickerETH.bidPrice;
 
-                    qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(infos.get(symbol + "_eth").baseAssetPrecision).toNumber();
+                    qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(precETH).toNumber();
 
                     totalMinuteWeight++;
                     totalMinuteOrderWeight++;
@@ -149,7 +151,7 @@ var manageArbitrageBTCtoXtoETHtoBTC = async function (tickers, infos, symbol) {
 
                         price = tickerEthBtc.bidPrice;
 
-                        qty = new BigNumber(orderB.order.total - orderB.order.commission).decimalPlaces(infos.get("eth_btc").baseAssetPrecision).toNumber();
+                        qty = new BigNumber(orderB.order.total - orderB.order.commission).decimalPlaces(precETHBTC).toNumber();
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
@@ -204,7 +206,9 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
     let tickerUSDT = tickers.get(symbol + "_usdt");
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate);
     let tickerIntermediateUSDT = tickers.get(intermediate + "_usdt");
-
+    const precUSDT = infos.get(symbol + "_usdt").baseAssetPrecision;
+    const precIntermediate = infos.get(symbol + "_" + intermediate).baseAssetPrecision;
+    const precIntermediateUSDT  = infos.get(intermediate + "_usdt").baseAssetPrecision;
 
     if (tickerUSDT &&
         tickerIntermediate &&
@@ -234,9 +238,9 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                 }
 
                 let price = tickerUSDT.askPrice;
-                var qty = Math.min(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty);
-                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_usdt").baseAssetPrecision).toNumber();
-                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
+                var qty = tradingUtils.getMin(process.env.MaxUSDT / price, tickerUSDT.askQty, tickerIntermediate.bidQty);
+                qty = new BigNumber(qty).decimalPlaces(precUSDT).toNumber();
+                qty = new BigNumber(qty).decimalPlaces(precIntermediate).toNumber();
 
                 totalMinuteWeight++;
                 totalMinuteOrderWeight++;
@@ -248,7 +252,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         log.green("First trade successful for arbitrage <usdt->" + symbol + "->" + intermediate + "->usdt> :", orderA);
 
                     let price = tickerIntermediate.bidPrice;
-                    qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
+                    qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(precIntermediate).toNumber();
 
                     totalMinuteWeight++;
                     totalMinuteOrderWeight++;
@@ -259,7 +263,7 @@ var manageArbitrageUSDT_X_Intermediate_USDT = async function (tickers, infos, sy
                         if (process.env.Debug == "true")
                             log.green("Second trade successful for arbitrage <usdt->" + symbol + "->" + intermediate + "->usdt> :", orderB);
                         price = tickerIntermediateUSDT.bidPrice;
-                        qty = new BigNumber(orderB.order.total - orderB.order.commission).decimalPlaces(infos.get(intermediate + "_usdt").baseAssetPrecision).toNumber();
+                        qty = new BigNumber(orderB.order.total - orderB.order.commission).decimalPlaces(precIntermediateUSDT).toNumber();
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
@@ -316,6 +320,9 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
     let tickerSource = tickers.get(symbol + "_" + source);
     let tickerIntermediate = tickers.get(symbol + "_" + intermediate);
     let tickerSourceIntermediate = tickers.get(source + "_" + intermediate);
+    const precSource = infos.get(symbol + "_" + source).baseAssetPrecision;
+    const precIntermediate = infos.get(symbol + "_" + intermediate).baseAssetPrecision;
+    const precSourceIntermediate  = infos.get(source + "_" + intermediate).baseAssetPrecision;
 
     if (tickerSource &&
         tickerIntermediate &&
@@ -364,8 +371,8 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                 }
                 let price = tickerSource.askPrice;
 
-                var qty = Math.min(new BigNumber(maxSource / price).decimalPlaces(infos.get(symbol + "_" + source).baseAssetPrecision).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty);
-                qty = new BigNumber(qty).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
+                var qty = tradingUtils.getMin(new BigNumber(maxSource / price).decimalPlaces(precSource).toNumber(), tickerSource.askQty, tickerIntermediate.bidQty);
+                qty = new BigNumber(qty).decimalPlaces(precIntermediate).toNumber();
 
                 totalMinuteWeight++;
                 totalMinuteOrderWeight++;
@@ -378,7 +385,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                         log.green("First trade successful for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", orderA);
 
                     let price = tickerIntermediate.bidPrice;
-                    qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(infos.get(symbol + "_" + intermediate).baseAssetPrecision).toNumber();
+                    qty = new BigNumber(orderA.order.baseAmount - orderA.order.commission).decimalPlaces(precIntermediate).toNumber();
 
                     totalMinuteWeight++;
                     totalMinuteOrderWeight++;
@@ -390,7 +397,7 @@ var manageArbitrageSource_X_Intermediate_Source = async function (tickers, infos
                             log.green("Second trade successful for arbitrage <" + source + "->" + symbol + "->" + intermediate + "->" + source + "> :", orderB);
 
                         price = tickerSourceIntermediate.askPrice;
-                        qty = new BigNumber((orderB.order.total - orderB.order.commission) / price).decimalPlaces(infos.get(source + "_" + intermediate).baseAssetPrecision).toNumber();
+                        qty = new BigNumber((orderB.order.total - orderB.order.commission) / price).decimalPlaces(precSourceIntermediate).toNumber();
 
                         totalMinuteWeight++;
                         totalMinuteOrderWeight++;
