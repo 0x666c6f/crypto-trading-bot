@@ -37,14 +37,13 @@ var generateSignature = function (args) {
     return crypto.createHmac('sha512', process.env.APISecret).update(args).digest('hex');
 };
 
-var getMin = function findMinMax(arr) {
+var getMin = function (arr) {
     let min = arr[0].y;
   
     const len = arr.length;
     for (let i = 1; i < len; i++) {
       let v = arr[i].y;
       min = (v < min) ? v : min;
-      max = (v > max) ? v : max;
     }
   
     return min;
