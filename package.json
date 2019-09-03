@@ -19,7 +19,6 @@
   "homepage": "https://github.com/florianpautot/go-crypto-bot#readme",
   "dependencies": {
     "bignumber.js": "^9.0.0",
-    "bluebird": "^3.5.5",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "cron": "^1.7.1",
@@ -27,8 +26,7 @@
     "moment": "^2.24.0",
     "ololog": "^1.1.146",
     "request": "^2.88.0",
-    "sleep": "^6.1.0",
-    "winston": "^3.2.1"
+    "sleep": "^6.1.0"
   },
   "devDependencies": {
     "eslint": "^6.2.0",

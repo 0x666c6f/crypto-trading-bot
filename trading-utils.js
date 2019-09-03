@@ -2,29 +2,19 @@ var crypto = require("crypto");
 
 var formatTickers = function (tickers) {
     let formattedTickers = new Map();
-    let ethPairs = [];
-    let btcPairs = [];
-    let usdtPairs = [];
     let symbols = [];
-    tickers.forEach(ticker => {
+    const tickersLength = tickers.length;
+    for (let index = 0; index < tickersLength; index ++)
+    {
+        ticker = tickers[index];
         let symbol = ticker.symbol.split("_")[0];
         if (process.env.Exclusions.indexOf(symbol) == -1) {
             formattedTickers.set(ticker.symbol, ticker);
-            if (ticker.symbol.indexOf("_eth") != -1) {
-                ethPairs.push(ticker);
-            }
-            if (ticker.symbol.indexOf("_btc") != -1) {
-                btcPairs.push(ticker);
-            }
-            if (ticker.symbol.indexOf("_usdt") != -1) {
-                usdtPairs.push(ticker);
-            }
-
             if (symbols.indexOf(symbol) == -1) {
                 symbols.push(symbol);
             }
         }
-    });
+    }
 
     formattedTickers.set("symbols", symbols);
 
@@ -33,17 +23,34 @@ var formatTickers = function (tickers) {
 
 var formatInfos = function (infos) {
     let formattedInfos = new Map();
-    infos.forEach(info => {
+    const infosLength = infos.length;
+    for (let index = 0; index < infosLength; index ++)
+    {
+        info = infos[index];
         formattedInfos.set(info.symbol, info);
-    });
+    }
+
     return formattedInfos;
 };
 
 var generateSignature = function (args) {
     return crypto.createHmac('sha512', process.env.APISecret).update(args).digest('hex');
-}
-;
+};
+
+var getMin = function findMinMax(arr) {
+    let min = arr[0].y;
+  
+    const len = arr.length;
+    for (let i = 1; i < len; i++) {
+      let v = arr[i].y;
+      min = (v < min) ? v : min;
+      max = (v > max) ? v : max;
+    }
+  
+    return min;
+  };
 
 exports.formatTickers = formatTickers;
 exports.formatInfos = formatInfos;
 exports.generateSignature = generateSignature;
+exports.getMin = getMin;
