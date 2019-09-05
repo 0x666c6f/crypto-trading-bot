@@ -1,4 +1,4 @@
-require('../config/config.js/index.js');
+require('../config/config.js');
 const trading_utils = require('../lib/trading-utils');
 var log = require("../logger/logger").logger;
 var tradeIO = require('../lib/tradeio');
