@@ -19,6 +19,8 @@ tradeIO.tickers().then(async function (tickers){
     const valBTC = formattedTickers.get('btc_usdt').askPrice;
     const valEth = formattedTickers.get('eth_usdt').askPrice;
 
+    const startDate = processDate.utc().hour(0).minute(0).second(0).millisecond(0).unix()*1000
+    const endDate = processDate.utc().add(1,'day').hour(0).minute(0).second(0).millisecond(0).unix()*1000
     for (const ticker of tickers.tickers) {
         log("Processing volume for pair :", ticker.symbol.toUpperCase());
         let baseAsset = ticker.symbol.split("_")[1];
@@ -27,11 +29,11 @@ tradeIO.tickers().then(async function (tickers){
         let page = 1;
         let stop = false;
         while(!stop){
-            let tickerTrades = await tradeIO.closedTrades(ticker.symbol,undefined,undefined,page,200);
-            if (tickerTrades.data.length != 0){
-                for(const trade of tickerTrades.data){
-                    let date = moment(trade.createdAt, "YYYY-MM-DDTHH:mm:ss.SSSSSSSZ");
-                    if(processDate.dayOfYear() == date.dayOfYear()){
+            try {
+                let tickerTrades = await tradeIO.closedTrades(ticker.symbol,startDate,endDate,page,200);
+                console.log(tickerTrades);
+                if (tickerTrades && tickerTrades.data && tickerTrades.data.length != 0){
+                    for(const trade of tickerTrades.data){
                         tradeNb++;
                         tickerVolume += parseFloat(trade.quoteAmount);
                         switch (baseAsset) {
@@ -47,16 +49,18 @@ tradeIO.tickers().then(async function (tickers){
                             default:
                                 break;
                         }
+                        page++;
+ 
                     }
-                    page++;
+                } else{
+                    stop = true;
+                    volumes.set(ticker.symbol, tickerVolume);
                 }
-            } else{
-                stop = true;
-                volumes.set(ticker.symbol, tickerVolume);
+            } catch (error) {
+                console.log(error);
             }
-        }
-        
 
+        }
     }
 
     volumes.set("total_btc",btcVol);
